@@ -16,8 +16,8 @@ All 22 patterns of the catalog, one package per language, each idiomatic to that
 | --- | --- | --- |
 | TypeScript / JavaScript | [`gof-patterns`](packages/ts) — `npm i gof-patterns` | ✅ |
 | Python | [`gof-patterns`](packages/py) — `pip install gof-patterns` | ✅ |
-| Kotlin / JVM (usable from Java) | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, not published yet |
-| C# / .NET | [`gof-patterns`](packages/csharp) — `dotnet add package gof-patterns` | ✅ code, not published yet |
+| Kotlin / JVM (usable from Java) | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, release pipeline ready |
+| C# / .NET | [`gof-patterns`](packages/csharp) — `dotnet add package gof-patterns` | ✅ code, release pipeline ready |
 | Go | `packages/go` | planned |
 | Rust | `packages/rust` | planned |
 

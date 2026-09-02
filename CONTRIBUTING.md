@@ -122,11 +122,14 @@ Maintainers only, and deliberately boring:
    thing), then publishes:
    - npm via trusted publishing, with `--provenance`, so the published tarball is attested
      to this repo and workflow;
-   - PyPI via trusted publishing.
+   - PyPI via trusted publishing;
+   - NuGet via trusted publishing, which exchanges the OIDC token for a key valid one hour;
+   - Maven Central with a Portal token and a GPG signature, because it has no OIDC.
 
-Neither registry uses a long-lived token. Both authenticate with a short-lived OIDC token
-minted per run, which is also why the `release` environment name has to match what is
-configured on npm and PyPI.
+Three of the four registries use no long-lived token at all: npm, PyPI and NuGet each
+authenticate with a short-lived OIDC token minted per run, which is why the `release`
+environment name has to match what is configured on each of them. Maven Central is the
+exception — see below.
 
 One tag publishes one package. A `ts-v*` tag never touches PyPI.
 
@@ -137,7 +140,18 @@ One tag publishes one package. A `ts-v*` tag never touches PyPI.
   `release.yml`, environment `release`,
 - a PyPI trusted publisher for `gof-patterns` pointing at this repo, workflow
   `release.yml`, environment `release`,
+- a NuGet trusted publishing policy on nuget.org → your username → Trusted Publishing:
+  repository owner `Andrew-Tellez`, repository `patterns`, workflow file `release.yml`,
+  environment `release`. The policy's **scope must allow publishing new packages**, not only
+  new versions, or the first release is rejected. Also set a `NUGET_USER` secret to your
+  nuget.org profile name — not your email. It is not a credential, but it is not public
+  either,
 - the wiki initialised with one page, so `wiki.yml` has somewhere to push.
+
+One quirk worth knowing: a new NuGet policy on a repo can start **temporarily active for
+7 days**. NuGet needs the GitHub repository and owner IDs to pin the policy against a
+resurrection attack, and it only gets them from a successful publish. Publish once inside
+that window and the policy becomes permanent.
 
 **Maven Central needs more, because it has no OIDC.** It is the only registry here that
 requires long-lived credentials, and four secrets on the `release` environment:
