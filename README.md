@@ -44,7 +44,7 @@ costs no runtime dependency and no third-party service.
 
 | Package | Tests | Lines | Branches | Gate enforced in CI |
 | --- | --- | --- | --- | --- |
-| TypeScript | 40 | 100% | 98.2% | lines 100%, branches 95%, functions 90% |
+| TypeScript | 40 | 100% (99.6% as Node 22 counts it) | 98.2% | lines 99%, branches 95%, functions 90% |
 | Python | 45 | 100% | — | lines 100% (`--fail-under=100`) |
 | Kotlin | 23 | 100% | 97.7% | lines 99%, branches 95% |
 
@@ -57,6 +57,10 @@ cd packages/kotlin && ./gradlew jacocoTestCoverageVerification
 The badge tracks the enforced gate rather than a live measurement: coverage cannot fall below
 it without the build going red, so there is no third-party service in the loop. Add Codecov if
 you want per-commit numbers and a diff view on pull requests.
+
+The TypeScript gate is 99% rather than 100% because Node 22 and Node 24 instrument the same
+code differently — 99.64% against 100% — and a threshold has to hold on every runtime the
+package supports.
 
 ## Documentation
 

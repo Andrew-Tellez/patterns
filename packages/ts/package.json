@@ -37,7 +37,7 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "node --test src/*.test.ts",
     "prepublishOnly": "npm run build",
-    "coverage": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=95 --test-coverage-functions=90 src/*.test.ts"
+    "coverage": "node --test --experimental-test-coverage --test-coverage-lines=99 --test-coverage-branches=95 --test-coverage-functions=90 src/*.test.ts"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
