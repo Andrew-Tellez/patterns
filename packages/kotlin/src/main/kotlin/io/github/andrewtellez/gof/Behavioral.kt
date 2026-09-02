@@ -13,6 +13,7 @@ package io.github.andrewtellez.gof
  * )
  * ```
  */
+@JvmOverloads
 public fun <Req, Res> chain(
     handlers: List<(Req, () -> Res) -> Res>,
     fallback: ((Req) -> Res)? = null,
@@ -31,7 +32,7 @@ public fun <Req, Res> chain(
  * A command built from two lambdas, so the simple case needs no class of its own.
  * A command with no [undo] still runs, but cannot be undone.
  */
-public class Command<out T>(
+public class Command<out T> @JvmOverloads constructor(
     private val execute: () -> T,
     public val undo: (() -> Unit)? = null,
 ) {
@@ -143,7 +144,7 @@ public class Mediator {
  * Snapshots are stored by reference. Pass [snapshot] — a copy function — when the
  * state is mutated in place; with a `data class`, `copy()` is already what you want.
  */
-public class History<T>(
+public class History<T> @JvmOverloads constructor(
     initial: T,
     private val limit: Int = Int.MAX_VALUE,
     private val snapshot: (T) -> T = { it },

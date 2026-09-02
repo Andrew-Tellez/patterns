@@ -139,6 +139,26 @@ One tag publishes one package. A `ts-v*` tag never touches PyPI.
   `release.yml`, environment `release`,
 - the wiki initialised with one page, so `wiki.yml` has somewhere to push.
 
+**Maven Central needs more, because it has no OIDC.** It is the only registry here that
+requires long-lived credentials, and four secrets on the `release` environment:
+
+| Secret | What it is |
+| --- | --- |
+| `CENTRAL_USERNAME` / `CENTRAL_PASSWORD` | A user token from central.sonatype.com → Account → Generate User Token. Not your login. |
+| `SIGNING_KEY` | The armoured private key: `gpg --armor --export-secret-keys <fingerprint>`. Paste it whole, `BEGIN`/`END` lines included. |
+| `SIGNING_PASSPHRASE` | That key's passphrase. |
+
+Plus, once: verify the `io.github.andrew-tellez` namespace on the Portal (it hands you a
+code, you create a public repo with that name), and publish the *public* half of the signing
+key to a keyserver — `gpg --keyserver keyserver.ubuntu.com --send-keys <fingerprint>` —
+because Central checks the signature against it.
+
+`publishingType` is `USER_MANAGED`, so a tag uploads and validates the deployment and then
+waits for you to click Publish at
+[central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments).
+Change it to `AUTOMATIC` in `release.yml` once you trust it. **Central publishes are
+permanent — there is no unpublish**, which is why it is not automatic by default.
+
 ## License
 
 By contributing you agree your work is licensed under the [MIT License](LICENSE), the same

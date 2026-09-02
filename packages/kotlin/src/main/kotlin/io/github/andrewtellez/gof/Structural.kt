@@ -21,7 +21,10 @@ public fun <F> decorate(fn: F, vararg wrappers: (F) -> F): F =
  * box.sum { it.price } // 15.0
  * ```
  */
-public class Composite<T>(public val value: T, children: List<Composite<T>> = emptyList()) {
+public class Composite<T> @JvmOverloads constructor(
+    public val value: T,
+    children: List<Composite<T>> = emptyList(),
+) {
     private val mutableChildren: MutableList<Composite<T>> = children.toMutableList()
 
     public val children: List<Composite<T>> get() = mutableChildren

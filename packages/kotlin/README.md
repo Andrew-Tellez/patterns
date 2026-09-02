@@ -3,7 +3,7 @@
 The [Gang of Four catalog](https://refactoring.guru/design-patterns/catalog) as small, typed
 helpers. You write the domain logic; the pattern plumbing is already done.
 
-Zero dependencies. Kotlin 2.4, JVM 17+.
+No dependencies beyond the Kotlin standard library. Kotlin 2.4, JVM 17+.
 
 ```kotlin
 import io.github.andrewtellez.gof.StateMachine
@@ -74,6 +74,37 @@ for consistency across languages, open an issue — it is a real trade-off, not 
 | Visitor | `sealed interface` + `when` — the compiler checks you handled every case |
 | Template Method | Default lambda arguments: `fun report(parse: (String) -> T = ::parseCsv)` |
 | Iterator | `Sequence`, `iterator { }` and `for` |
+
+## Using it from Java
+
+Yes. It is a plain JVM jar with no Kotlin-only entry points, and
+[`src/test/java/.../JavaInteropTest.java`](src/test/java/io/github/andrewtellez/gof/JavaInteropTest.java)
+is a test written the way a Java caller would write it — so if the interop breaks, CI
+catches it rather than a user.
+
+```java
+StateMachine<String, String> order = new StateMachine<>(
+    "draft", Map.of("draft", Map.of("pay", "paid"), "paid", Map.of()));
+order.send("pay");   // "paid"
+
+Registry<String, IntFunction<String>> rails = new Registry<>();
+rails.register("stripe", cents -> "stripe:" + cents);
+rails.get("stripe").apply(500);
+```
+
+`Registry`'s second type parameter is whatever function type you want, so from Java you can
+register `java.util.function` interfaces and never touch a Kotlin type.
+
+Two things to know:
+
+- **Constructors with default arguments carry `@JvmOverloads`**, so `new History<>("a")` and
+  `new Composite<>(10.0)` work from Java. Without it, Java would have to pass every argument
+  — that is why the annotation is there, and the Java test is what proves it.
+- **A lambda that returns `Unit` needs `return kotlin.Unit.INSTANCE;`** — Java has no `Unit`.
+  This affects `Subject.subscribe`, `Mediator.on` and `Command`'s undo. It is the one real
+  wart; if Java is your primary language, open an issue and we can add
+  `Consumer`-shaped overloads.
+- Kotlin properties are getters: `root.getSize()`, `machine.getState()`.
 
 ## What Kotlin does better than the other packages
 

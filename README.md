@@ -30,7 +30,8 @@ All 22 patterns of the catalog, one package per language, each idiomatic to that
   the part it does not: `facade` builds subsystems lazily, `Flyweight` takes a custom key,
   `visitor` dispatches on a field so it works on JSON, `bridge` keeps a stable reference
   across a swap.
-- **No dependencies**, in any language package.
+- **No dependencies**, in any language package. The one exception is unavoidable:
+  the Kotlin package depends on `kotlin-stdlib`.
 - **The pattern's plumbing, not your domain.** You pass in the behaviour; the helper handles
   the bookkeeping (history stacks, listener sets, transition tables, caches).
 - **Typed.** A state machine with no `ship` transition fails at the type checker where the
