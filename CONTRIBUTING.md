@@ -99,15 +99,21 @@ Maintainers only, and deliberately boring:
 3. Push the tag. `release.yml` re-runs the tests, **verifies the tag matches the version
    declared in the package** (a mismatch fails the job instead of publishing the wrong
    thing), then publishes:
-   - npm with `--provenance`, so the published tarball is attested to this repo and workflow;
-   - PyPI via trusted publishing, so there is no long-lived API token to leak.
+   - npm via trusted publishing, with `--provenance`, so the published tarball is attested
+     to this repo and workflow;
+   - PyPI via trusted publishing.
+
+Neither registry uses a long-lived token. Both authenticate with a short-lived OIDC token
+minted per run, which is also why the `release` environment name has to match what is
+configured on npm and PyPI.
 
 One tag publishes one package. A `ts-v*` tag never touches PyPI.
 
 **Repository settings this depends on** (one-time, by a maintainer):
 
 - a `release` GitHub environment,
-- `NPM_TOKEN` as a secret in that environment (an automation token with publish rights),
+- an npm trusted publisher for `gof-patterns` pointing at this repo, workflow
+  `release.yml`, environment `release`,
 - a PyPI trusted publisher for `gof-patterns` pointing at this repo, workflow
   `release.yml`, environment `release`,
 - the wiki initialised with one page, so `wiki.yml` has somewhere to push.
