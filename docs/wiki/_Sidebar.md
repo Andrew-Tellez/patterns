@@ -6,6 +6,7 @@
 
 ---
 
+- [How to use it, and when](https://github.com/Andrew-Tellez/patterns/blob/main/USE-CASES.md)
 - [TypeScript package](https://github.com/Andrew-Tellez/patterns/tree/main/packages/ts)
 - [Python package](https://github.com/Andrew-Tellez/patterns/tree/main/packages/py)
 - [Contributing](https://github.com/Andrew-Tellez/patterns/blob/main/CONTRIBUTING.md)

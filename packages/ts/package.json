@@ -2,7 +2,7 @@
   "name": "@andrew-tellez/patterns",
   "version": "0.1.0",
   "description": "GoF design patterns as tiny, typed helpers. You supply the domain logic; the pattern plumbing is done.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": "Andrew Tellez",
   "repository": {
     "type": "git",

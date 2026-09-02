@@ -1,6 +1,6 @@
 """gof-patterns — the GoF catalog as small, typed helpers.
 
-Apache-2.0. https://refactoring.guru/design-patterns/catalog
+MIT. https://refactoring.guru/design-patterns/catalog
 """
 
 from .behavioral import (

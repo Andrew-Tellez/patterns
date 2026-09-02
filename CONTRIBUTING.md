@@ -114,5 +114,5 @@ One tag publishes one package. A `ts-v*` tag never touches PyPI.
 
 ## License
 
-By contributing you agree your work is licensed under the
-[Apache License 2.0](LICENSE), the same as the rest of the repo. No CLA.
+By contributing you agree your work is licensed under the [MIT License](LICENSE), the same
+as the rest of the repo. No CLA.

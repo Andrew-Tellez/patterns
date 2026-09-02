@@ -21,6 +21,12 @@ order.send("pay")   # "paid"
 order.send("pay")   # ValueError: 'pay' is not allowed in 'sent'
 ```
 
+## When would I use this?
+
+[**How to use it, and when**](https://github.com/Andrew-Tellez/patterns/blob/main/USE-CASES.md) walks through ten situations from real
+code — a webhook with several payload shapes, an order that must not skip steps, a flaky
+provider that needs retries — and says which helper each one calls for.
+
 ## The catalog
 
 **Six of the 22 patterns are already in the standard library.** This package does not wrap
@@ -104,4 +110,4 @@ python3 -m unittest discover -s tests -t .   # stdlib, no framework
 
 ## License
 
-Apache-2.0
+MIT

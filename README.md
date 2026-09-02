@@ -3,7 +3,7 @@
 [![ci](https://github.com/Andrew-Tellez/patterns/actions/workflows/ci.yml/badge.svg)](https://github.com/Andrew-Tellez/patterns/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@andrew-tellez/patterns?label=npm)](https://www.npmjs.com/package/@andrew-tellez/patterns)
 [![PyPI](https://img.shields.io/pypi/v/gof-patterns?label=pypi)](https://pypi.org/project/gof-patterns/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Design patterns you can drop into real code — the
 [Gang of Four catalog](https://refactoring.guru/design-patterns/catalog) packaged as small
@@ -31,6 +31,8 @@ One package per language, each idiomatic to that language, same catalog and same
 
 ## Documentation
 
+- **[How to use it, and when](USE-CASES.md)** — ten situations from real code, the helper each
+  one calls for, and when to reach for nothing at all. Every snippet runs as a test.
 - Package READMEs — the catalog table and every helper: [TypeScript](packages/ts/README.md) ·
   [Python](packages/py/README.md)
 - [Wiki](../../wiki) — when to reach for a pattern, and when not to. Written in
@@ -45,4 +47,4 @@ Adding a language is the most useful contribution right now — Kotlin/JVM and C
 
 ## License
 
-[Apache License 2.0](LICENSE)
+[MIT](LICENSE)
