@@ -1,0 +1,48 @@
+{
+  "name": "@andrew-tellez/patterns",
+  "version": "0.1.0",
+  "description": "GoF design patterns as tiny, typed helpers. You supply the domain logic; the pattern plumbing is done.",
+  "license": "Apache-2.0",
+  "author": "Andrew Tellez",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andrew-Tellez/patterns.git",
+    "directory": "packages/ts"
+  },
+  "homepage": "https://github.com/Andrew-Tellez/patterns#readme",
+  "keywords": [
+    "design-patterns",
+    "gof",
+    "typescript",
+    "singleton",
+    "builder",
+    "state-machine",
+    "observer",
+    "strategy"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "node --test src/*.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "typescript": "^5.7.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
