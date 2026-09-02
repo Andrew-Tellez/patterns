@@ -19,6 +19,24 @@ for file in examples/*/before.py examples/*/after.py; do
   if PYTHONPATH=packages/py python3 "$file" >/dev/null 2>&1; then echo 'ok'; else echo 'FAILED'; failed=1; fi
 done
 
+# Go and C# examples are whole programs rather than a before/after pair, so they
+# run through their own toolchain.
+if command -v go >/dev/null 2>&1; then
+  for dir in examples/*/go; do
+    [ -d "$dir" ] || continue
+    printf '  go run %-45s' "./$dir"
+    if (cd "$dir" && go run . >/dev/null 2>&1); then echo 'ok'; else echo 'FAILED'; failed=1; fi
+  done
+fi
+
+if command -v dotnet >/dev/null 2>&1; then
+  for dir in examples/*/csharp; do
+    [ -d "$dir" ] || continue
+    printf '  dotnet run %-42s' "./$dir"
+    if (cd "$dir" && dotnet run --verbosity quiet >/dev/null 2>&1); then echo 'ok'; else echo 'FAILED'; failed=1; fi
+  done
+fi
+
 if [ "$failed" -ne 0 ]; then
   echo
   echo 'An example failed. Run it directly to see why.' >&2

@@ -21,6 +21,11 @@ order.send("pay")   # "paid"
 order.send("pay")   # ValueError: 'pay' is not allowed in 'sent'
 ```
 
+![Singleton en Python](https://raw.githubusercontent.com/Andrew-Tellez/patterns/main/docs/videos/singleton-readme.gif)
+
+The videos are rendered from code, not screen-recorded. This one is Singleton in
+Python: [watch the full version](https://github.com/Andrew-Tellez/patterns/blob/main/docs/videos/singleton-python.mp4).
+
 ## When would I use this?
 
 [**How to use it, and when**](https://github.com/Andrew-Tellez/patterns/blob/main/USE-CASES.md) walks through thirteen situations from real

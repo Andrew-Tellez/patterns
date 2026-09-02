@@ -22,7 +22,7 @@ export type PatternScript = {
   title: string;
   /** One line saying what the video is about. */
   subtitle: string;
-  language: 'TypeScript' | 'Python';
+  language: 'TypeScript' | 'Python' | 'Kotlin' | 'C#' | 'Go';
   /** The file name shown in the editor chrome. */
   fileName: string;
   /** The terminal that opens the video: the bug reproducing. */

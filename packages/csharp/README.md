@@ -26,6 +26,11 @@ order.Send("pay");  // InvalidOperationException: "pay" is not allowed in "sent"
 The NuGet id is `gof-patterns` — the same name as on npm, PyPI and Maven Central, because
 `GofPatterns` was already taken. The namespace is `GofPatterns`.
 
+![Singleton en C#](https://raw.githubusercontent.com/Andrew-Tellez/patterns/main/docs/videos/singleton-readme.gif)
+
+The videos are rendered from code, not screen-recorded. This one is Singleton in
+C#: [watch the full version](https://github.com/Andrew-Tellez/patterns/blob/main/docs/videos/singleton-csharp.mp4).
+
 ## When would I use this?
 
 [**How to use it, and when**](https://github.com/Andrew-Tellez/patterns/blob/main/USE-CASES.md)

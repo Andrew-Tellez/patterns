@@ -25,6 +25,11 @@ order.Send("pay")  // error: pay is not allowed in sent
 There is no registry to publish to: `go get` resolves a version from the repository tag and
 the module proxy caches it. Go is the one language here where releasing is a `git tag`.
 
+![Singleton en Go](https://raw.githubusercontent.com/Andrew-Tellez/patterns/main/docs/videos/singleton-readme.gif)
+
+The videos are rendered from code, not screen-recorded. This one is Singleton in
+Go: [watch the full version](https://github.com/Andrew-Tellez/patterns/blob/main/docs/videos/singleton-go.mp4).
+
 ## When would I use this?
 
 [**How to use it, and when**](https://github.com/Andrew-Tellez/patterns/blob/main/USE-CASES.md)

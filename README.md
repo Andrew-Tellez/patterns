@@ -12,6 +12,14 @@ typed helpers instead of textbook class diagrams to copy by hand.
 
 All 22 patterns of the catalog, one package per language, each idiomatic to that language.
 
+![Singleton en TypeScript](docs/videos/singleton-readme.gif)
+
+Every pattern gets a video, rendered from code rather than screen-recorded. Singleton is done
+in all five languages — **[TypeScript](docs/videos/singleton-typescript.mp4)** ·
+[Python](docs/videos/singleton-python.mp4) · [Kotlin](docs/videos/singleton-kotlin.mp4) ·
+[C#](docs/videos/singleton-csharp.mp4) · [Go](docs/videos/singleton-go.mp4) — and the Kotlin
+one is the interesting one: it explains why that package ships **no** singleton helper.
+
 | Language | Package | Status |
 | --- | --- | --- |
 | TypeScript / JavaScript | [`gof-patterns`](packages/ts) — `npm i gof-patterns` | ✅ |

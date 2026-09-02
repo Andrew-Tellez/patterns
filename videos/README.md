@@ -18,6 +18,29 @@ One composition renders in about 20-30 seconds at 1920×1080. The first run down
 headless Chrome (~95 MB). `out/` is gitignored — the sources are the artefact, the MP4s are
 the build output.
 
+## Rendered so far
+
+Committed to [`../docs/videos`](../docs/videos), so GitHub can serve them:
+
+| Video | Language | Length | What it argues |
+| --- | --- | --- | --- |
+| [singleton-typescript.mp4](../docs/videos/singleton-typescript.mp4) | TypeScript | 52s | One lazy shared instance, and why `reset()` saves your tests |
+| [singleton-python.mp4](../docs/videos/singleton-python.mp4) | Python | 46s | The same, and when `functools.cache` is the better answer |
+| [singleton-kotlin.mp4](../docs/videos/singleton-kotlin.mp4) | Kotlin | 49s | Eleven lines of hand-rolled ceremony against three, and why the Kotlin package ships no helper |
+| [singleton-csharp.mp4](../docs/videos/singleton-csharp.mp4) | C# | 48s | The same, against `Lazy<T>` |
+| [singleton-go.mp4](../docs/videos/singleton-go.mp4) | Go | 48s | The same, against `sync.OnceValue`, plus goroutine safety |
+| [singleton-readme.gif](../docs/videos/singleton-readme.gif) | TypeScript | 25s | The short cut embedded in the READMEs |
+
+**Why a GIF for the README.** GitHub does not play an `.mp4` referenced by a repository path —
+it renders a link, and the file only gets a player in GitHub's own file viewer. An animated GIF
+plays inline everywhere, including npm, PyPI and NuGet, which is why the front page embeds
+`singleton-readme.gif` (472 KB) and links the MP4s.
+
+**A note on scale.** Six megabytes of video in git is fine. A hundred and ten of them —
+22 patterns times five languages — is not. When the count grows, move the MP4s to a GitHub
+release and point the READMEs at the release URLs; the compositions stay the source of truth
+either way.
+
 ## What a video is made of
 
 Each video is one `PatternScript` in `src/scripts/`. Adding a pattern is a data file, not a
