@@ -25,13 +25,18 @@ const scripts: { id: string; script: PatternScript }[] = [
 ];
 
 /**
- * A shorter cut for the README: the problem, the two steps that carry the idea, and
- * the result. Long enough to explain, short enough to be a GIF GitHub will play.
+ * A shorter cut for the README. The steps are picked by index rather than sliced,
+ * because the interesting ones are not the first ones: slicing the first two showed
+ * the problem and then an `import` line, so the cut never contained the line that
+ * applies the pattern. Pick the beats that carry the idea.
  */
-const readmeCut = (script: PatternScript): PatternScript => ({
+const readmeCut = (script: PatternScript, keep: number[]): PatternScript => ({
   ...script,
-  steps: script.steps.slice(0, 2).map((step) => ({ ...step, seconds: 4.5 })),
+  steps: keep.map((index) => ({ ...script.steps[index], seconds: 4 })),
 });
+
+/** Singleton: the painful version, the one line that fixes it, the call sites. */
+const singletonReadme = readmeCut(singletonTypeScript, [0, 2, 3]);
 
 export const Root: React.FC = () => (
   <>
@@ -50,11 +55,11 @@ export const Root: React.FC = () => (
     <Composition
       id="singleton-typescript-readme"
       component={PatternVideo}
-      durationInFrames={durationInFrames(readmeCut(singletonTypeScript), FPS)}
+      durationInFrames={durationInFrames(singletonReadme, FPS)}
       fps={FPS}
       width={1920}
       height={1080}
-      defaultProps={{ script: readmeCut(singletonTypeScript) }}
+      defaultProps={{ script: singletonReadme }}
     />
   </>
 );

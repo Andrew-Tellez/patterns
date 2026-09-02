@@ -25,6 +25,16 @@ out with its first few characters cut off. And a smaller frame does not rescale 
 just fits less. So render at 1080p and use `--scale` to shrink the output: it scales the
 rendering, not the layout, so nothing reflows.
 
+**Pick the steps for a short cut, do not slice them.** `readmeCut` in `Root.tsx` takes step
+indices for a reason: the first two steps of the Singleton script are the problem and an
+`import` line, so slicing them produced a GIF that never showed
+`const config = singleton(loadConfig)` — the one line the whole video is about. Choose the
+beats that carry the idea, then check the rendered GIF rather than the composition:
+
+```bash
+ffmpeg -ss 22 -i out/singleton-readme.gif -frames:v 1 -y frame.png
+```
+
 **Pace lives in one constant.** `PACE` in `PatternVideo.tsx` multiplies every step's
 `seconds`, and typing takes the first half of a step with the rest held for reading. Slowing
 the whole series down is one number, not twenty edits.
@@ -40,7 +50,7 @@ Committed to [`../docs/videos`](../docs/videos), so GitHub can serve them:
 | [singleton-kotlin.mp4](../docs/videos/singleton-kotlin.mp4) | Kotlin | 67s | Eleven lines of hand-rolled ceremony against three, and why the Kotlin package ships no helper |
 | [singleton-csharp.mp4](../docs/videos/singleton-csharp.mp4) | C# | 65s | The same, against `Lazy<T>` |
 | [singleton-go.mp4](../docs/videos/singleton-go.mp4) | Go | 65s | The same, against `sync.OnceValue`, plus goroutine safety |
-| [singleton-readme.gif](../docs/videos/singleton-readme.gif) | TypeScript | 34s | The short cut embedded in the READMEs |
+| [singleton-readme.gif](../docs/videos/singleton-readme.gif) | TypeScript | 38s | The short cut embedded in the READMEs |
 
 **Why a GIF for the README.** GitHub does not play an `.mp4` referenced by a repository path —
 it renders a link, and the file only gets a player in GitHub's own file viewer. An animated GIF
