@@ -14,9 +14,20 @@ npm run studio          # preview and scrub in the browser
 npm run render-all      # every composition to out/
 ```
 
-One composition renders in about 20-30 seconds at 1920×1080. The first run downloads a
-headless Chrome (~95 MB). `out/` is gitignored — the sources are the artefact, the MP4s are
-the build output.
+One composition renders in about 30 seconds at 1920×1080. The first run downloads a headless
+Chrome (~95 MB). `out/` is gitignored — the sources are the artefact, the MP4s are the build
+output.
+
+**Every composition is 1920×1080, on purpose.** Two things go wrong otherwise. A frame
+narrower than the layout clips it, and because flexbox centring spills overflow to the left,
+the clip lands on the *start* of every line — which is exactly how the first README GIF came
+out with its first few characters cut off. And a smaller frame does not rescale the type, it
+just fits less. So render at 1080p and use `--scale` to shrink the output: it scales the
+rendering, not the layout, so nothing reflows.
+
+**Pace lives in one constant.** `PACE` in `PatternVideo.tsx` multiplies every step's
+`seconds`, and typing takes the first half of a step with the rest held for reading. Slowing
+the whole series down is one number, not twenty edits.
 
 ## Rendered so far
 
@@ -24,12 +35,12 @@ Committed to [`../docs/videos`](../docs/videos), so GitHub can serve them:
 
 | Video | Language | Length | What it argues |
 | --- | --- | --- | --- |
-| [singleton-typescript.mp4](../docs/videos/singleton-typescript.mp4) | TypeScript | 52s | One lazy shared instance, and why `reset()` saves your tests |
-| [singleton-python.mp4](../docs/videos/singleton-python.mp4) | Python | 46s | The same, and when `functools.cache` is the better answer |
-| [singleton-kotlin.mp4](../docs/videos/singleton-kotlin.mp4) | Kotlin | 49s | Eleven lines of hand-rolled ceremony against three, and why the Kotlin package ships no helper |
-| [singleton-csharp.mp4](../docs/videos/singleton-csharp.mp4) | C# | 48s | The same, against `Lazy<T>` |
-| [singleton-go.mp4](../docs/videos/singleton-go.mp4) | Go | 48s | The same, against `sync.OnceValue`, plus goroutine safety |
-| [singleton-readme.gif](../docs/videos/singleton-readme.gif) | TypeScript | 25s | The short cut embedded in the READMEs |
+| [singleton-typescript.mp4](../docs/videos/singleton-typescript.mp4) | TypeScript | 71s | One lazy shared instance, and why `reset()` saves your tests |
+| [singleton-python.mp4](../docs/videos/singleton-python.mp4) | Python | 63s | The same, and when `functools.cache` is the better answer |
+| [singleton-kotlin.mp4](../docs/videos/singleton-kotlin.mp4) | Kotlin | 67s | Eleven lines of hand-rolled ceremony against three, and why the Kotlin package ships no helper |
+| [singleton-csharp.mp4](../docs/videos/singleton-csharp.mp4) | C# | 65s | The same, against `Lazy<T>` |
+| [singleton-go.mp4](../docs/videos/singleton-go.mp4) | Go | 65s | The same, against `sync.OnceValue`, plus goroutine safety |
+| [singleton-readme.gif](../docs/videos/singleton-readme.gif) | TypeScript | 34s | The short cut embedded in the READMEs |
 
 **Why a GIF for the README.** GitHub does not play an `.mp4` referenced by a repository path —
 it renders a link, and the file only gets a player in GitHub's own file viewer. An animated GIF

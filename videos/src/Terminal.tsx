@@ -17,10 +17,10 @@ export const Terminal: React.FC<{ data: TerminalData; startFrame?: number }> = (
         background: '#010409',
         border: `1px solid ${theme.border}`,
         borderRadius: 12,
-        padding: '28px 32px',
+        padding: '40px 44px',
         fontFamily: theme.mono,
-        fontSize: 30,
-        lineHeight: '46px',
+        fontSize: 40,
+        lineHeight: '62px',
         color: theme.text,
         whiteSpace: 'pre-wrap',
       }}

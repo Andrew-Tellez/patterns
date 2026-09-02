@@ -5,16 +5,22 @@ import { Terminal } from './Terminal';
 import { theme } from './theme';
 import type { PatternScript } from './types';
 
-const TITLE_SECONDS = 3;
-const PROBLEM_SECONDS = 6;
-const OUTCOME_SECONDS = 7;
+const TITLE_SECONDS = 4;
+const PROBLEM_SECONDS = 8;
+const OUTCOME_SECONDS = 9;
+
+/**
+ * Global pace. Every step's `seconds` is multiplied by this, so the whole series
+ * slows down or speeds up from one number instead of twenty edits.
+ */
+const PACE = 1.4;
 
 /** Total frames for a script, so the composition and the render agree. */
 export const durationInFrames = (script: PatternScript, fps: number): number =>
   Math.round(
     (TITLE_SECONDS +
       PROBLEM_SECONDS +
-      script.steps.reduce((total, step) => total + step.seconds, 0) +
+      script.steps.reduce((total, step) => total + step.seconds * PACE, 0) +
       OUTCOME_SECONDS) *
       fps,
   );
@@ -58,7 +64,7 @@ export const PatternVideo: React.FC<{ script: PatternScript }> = ({ script }) =>
 
   const titleFrames = TITLE_SECONDS * fps;
   const problemFrames = PROBLEM_SECONDS * fps;
-  const stepFrames = script.steps.map((step) => Math.round(step.seconds * fps));
+  const stepFrames = script.steps.map((step) => Math.round(step.seconds * PACE * fps));
   const stepsStart = titleFrames + problemFrames;
   const stepsTotal = stepFrames.reduce((a, b) => a + b, 0);
 
@@ -72,8 +78,8 @@ export const PatternVideo: React.FC<{ script: PatternScript }> = ({ script }) =>
   const inSteps = frame >= stepsStart && frame < stepsStart + stepsTotal;
   const step = script.steps[index];
   const previous = index === 0 ? '' : script.steps[index - 1].code;
-  // Type over the first 60% of the step, then hold so it can be read.
-  const typingFrames = Math.max(1, Math.round(stepFrames[index] * 0.6));
+  // Type over the first half of the step, then hold so it can be read.
+  const typingFrames = Math.max(1, Math.round(stepFrames[index] * 0.5));
   const progress = Math.min(1, Math.max(0, elapsed / typingFrames));
   const code = typedCode(previous, step.code, progress);
 
@@ -88,15 +94,17 @@ export const PatternVideo: React.FC<{ script: PatternScript }> = ({ script }) =>
             <div style={{ fontSize: 110, fontWeight: 700, color: theme.text, margin: '24px 0' }}>
               {script.title}
             </div>
-            <div style={{ fontSize: 40, color: theme.dim, maxWidth: 1400 }}>{script.subtitle}</div>
+            <div style={{ fontSize: 40, color: theme.dim, maxWidth: '80%', margin: '0 auto' }}>
+              {script.subtitle}
+            </div>
           </div>
         </Card>
       </Sequence>
 
       <Sequence from={titleFrames} durationInFrames={problemFrames}>
         <Card>
-          <div style={{ width: 1500 }}>
-            <div style={{ fontSize: 36, color: theme.bad, marginBottom: 24, fontWeight: 600 }}>
+          <div style={{ width: '80%', maxWidth: 1600 }}>
+            <div style={{ fontSize: 44, color: theme.bad, marginBottom: 28, fontWeight: 700 }}>
               El problema
             </div>
             <Terminal data={script.problem} startFrame={0} />
@@ -139,8 +147,8 @@ export const PatternVideo: React.FC<{ script: PatternScript }> = ({ script }) =>
 
       <Sequence from={stepsStart + stepsTotal} durationInFrames={OUTCOME_SECONDS * fps}>
         <Card>
-          <div style={{ width: 1500 }}>
-            <div style={{ fontSize: 36, color: theme.good, marginBottom: 24, fontWeight: 600 }}>
+          <div style={{ width: '80%', maxWidth: 1600 }}>
+            <div style={{ fontSize: 44, color: theme.good, marginBottom: 28, fontWeight: 700 }}>
               Con el patrón
             </div>
             <Terminal data={script.outcome} startFrame={0} />

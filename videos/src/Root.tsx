@@ -52,8 +52,8 @@ export const Root: React.FC = () => (
       component={PatternVideo}
       durationInFrames={durationInFrames(readmeCut(singletonTypeScript), FPS)}
       fps={FPS}
-      width={1280}
-      height={720}
+      width={1920}
+      height={1080}
       defaultProps={{ script: readmeCut(singletonTypeScript) }}
     />
   </>
