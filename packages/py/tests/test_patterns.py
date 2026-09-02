@@ -263,5 +263,71 @@ class TestBehavioral(unittest.TestCase):
             run(nope=lambda: None)
 
 
+class TestParity(unittest.TestCase):
+    """Cases the TypeScript suite covers too — kept in step on purpose."""
+
+    def test_registry_accepts_creators_up_front(self):
+        shapes: Registry[dict] = Registry(circle=lambda r: {"r": r})
+        self.assertEqual(shapes.create("circle", 1), {"r": 1})
+        self.assertIn("circle", shapes)
+        self.assertNotIn("square", shapes)
+
+    def test_adapt_maps_several_methods_at_once(self):
+        class Legacy:
+            def get(self, k):
+                return f"v:{k}"
+
+            def put(self, k):
+                return f"ok:{k}"
+
+        legacy = Legacy()
+        api = adapt(
+            legacy,
+            read=lambda l: l.get,
+            write=lambda l: l.put,
+            describe=lambda l: lambda: type(l).__name__,
+        )
+        self.assertEqual(api.read("a"), "v:a")
+        self.assertEqual(api.write("a"), "ok:a")
+        self.assertEqual(api.describe(), "Legacy")
+
+    def test_composite_accepts_children_up_front(self):
+        root = Composite({"n": 1}, [Composite({"n": 2}), Composite({"n": 3})])
+        self.assertEqual(root.sum(lambda v: v["n"]), 6)
+
+    def test_mediator_unsubscribes(self):
+        hub = Mediator()
+        seen = []
+        off = hub.on("tick", lambda _: seen.append(1))
+        hub.emit("tick")
+        off()
+        hub.emit("tick")
+        self.assertEqual(seen, [1])
+        off()  # unsubscribing twice must not raise
+
+    def test_decorate_with_no_wrappers_returns_the_function(self):
+        def fn():
+            return 1
+
+        self.assertIs(decorate(fn), fn)
+
+    def test_template_passes_arguments_through(self):
+        run = template(
+            {"scale": lambda n: n * 2},
+            lambda hooks, n: hooks["scale"](n),
+        )
+        self.assertEqual(run()(5), 10)
+        self.assertEqual(run(scale=lambda n: n + 1)(5), 6)
+
+    def test_chain_handlers_receive_the_request(self):
+        seen = []
+        route = chain(
+            [lambda req, next_: seen.append(req) or next_()],
+            fallback=lambda req: "end",
+        )
+        self.assertEqual(route("payload"), "end")
+        self.assertEqual(seen, ["payload"])
+
+
 if __name__ == "__main__":
     unittest.main()

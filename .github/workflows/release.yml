@@ -1,0 +1,84 @@
+name: release
+
+# Tags come from cocogitto's per-package tags: `cog bump --auto` produces
+# `ts-vX.Y.Z` and `py-vX.Y.Z`. Each tag publishes exactly one package.
+on:
+  push:
+    tags:
+      - 'ts-v*'
+      - 'py-v*'
+
+permissions:
+  contents: read
+
+jobs:
+  npm:
+    if: startsWith(github.ref, 'refs/tags/ts-v')
+    name: publish @andrew-tellez/patterns
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    defaults:
+      run:
+        working-directory: packages/ts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+          cache-dependency-path: packages/ts/package-lock.json
+      - run: npm ci
+      - name: Verify the tag matches package.json
+        run: |
+          tagged="${GITHUB_REF_NAME#ts-v}"
+          declared="$(node -p "require('./package.json').version")"
+          if [ "$tagged" != "$declared" ]; then
+            echo "tag $GITHUB_REF_NAME says $tagged, package.json says $declared" >&2
+            exit 1
+          fi
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Test
+        run: npm test
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  pypi:
+    if: startsWith(github.ref, 'refs/tags/py-v')
+    name: publish gof-patterns
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write # PyPI trusted publishing
+    defaults:
+      run:
+        working-directory: packages/py
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify the tag matches pyproject.toml
+        run: |
+          tagged="${GITHUB_REF_NAME#py-v}"
+          declared="$(python -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")"
+          if [ "$tagged" != "$declared" ]; then
+            echo "tag $GITHUB_REF_NAME says $tagged, pyproject.toml says $declared" >&2
+            exit 1
+          fi
+      - name: Test
+        run: python -m unittest discover -s tests -t .
+      - name: Build
+        run: |
+          python -m pip install --quiet build
+          python -m build
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/py/dist

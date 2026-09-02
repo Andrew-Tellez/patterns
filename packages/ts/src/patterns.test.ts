@@ -15,7 +15,9 @@ test('singleton builds once and resets', () => {
 });
 
 test('registry creates by key and rejects unknown keys', () => {
-  const shapes = registry<{ circle: (r: number) => object }>();
+  const shapes = registry<{ circle: (r: number) => object }>({ circle: (r) => ({ r }) });
+  assert.equal(shapes.has('circle'), true);
+  assert.equal(shapes.has('square'), false);
   shapes.register('circle', (r) => ({ r }));
   assert.deepEqual(shapes.create('circle', 2), { r: 2 });
   assert.deepEqual(shapes.keys(), ['circle']);
@@ -190,4 +192,71 @@ test('template replaces only the overridden steps', () => {
   );
   assert.deepEqual(run()(), ['a', 'b']);
   assert.deepEqual(run({ read: () => 'x,y,z' })(), ['x', 'y', 'z']);
+});
+
+test('singleton reset before the first call is harmless', () => {
+  const get = singleton(() => 1);
+  get.reset();
+  assert.equal(get(), 1);
+});
+
+test('flyweight honours a custom key', () => {
+  const byName = flyweight(
+    (name: string, color: string) => ({ name, color }),
+    (name) => name,
+  );
+  assert.equal(byName('oak', 'green'), byName('oak', 'brown')); // color not in the key
+  assert.equal(byName.size(), 1);
+});
+
+test('adapt maps several methods at once', () => {
+  const legacy = { get: (k: string) => `v:${k}`, put: (k: string) => `ok:${k}` };
+  const api = adapt(legacy, {
+    read: (l) => l.get,
+    write: (l) => l.put,
+    describe: (l) => () => Object.keys(l).length,
+  });
+  assert.equal(api.read('a'), 'v:a');
+  assert.equal(api.write('a'), 'ok:a');
+  assert.equal(api.describe(), 2);
+});
+
+test('composite accepts children up front', () => {
+  const root = composite({ n: 1 }, [composite({ n: 2 }), composite({ n: 3 })]);
+  assert.equal(root.sum((v) => v.n), 6);
+});
+
+test('chain works with async handlers', async () => {
+  const route = chain<string, Promise<string>>(
+    [
+      async (id, next) => (id === 'cache' ? 'from-cache' : next()),
+      async (id, next) => (id === 'db' ? 'from-db' : next()),
+    ],
+    async () => 'not-found',
+  );
+  assert.equal(await route('cache'), 'from-cache');
+  assert.equal(await route('db'), 'from-db');
+  assert.equal(await route('zzz'), 'not-found');
+});
+
+test('history snapshots defensively when asked', () => {
+  const state = { text: '' };
+  const h = history(state, { snapshot: structuredClone });
+  h.save(state);
+  state.text = 'mutated';
+  assert.deepEqual(h.undo(), { text: '' });
+});
+
+test('stateMachine accepts a dynamic target', () => {
+  const gate = stateMachine<'closed' | 'open', 'try'>({
+    initial: 'closed',
+    states: { closed: { try: (ok) => (ok ? 'open' : 'closed') }, open: {} },
+  });
+  assert.equal(gate.send('try', false), 'closed');
+  assert.equal(gate.send('try', true), 'open');
+});
+
+test('decorate with no wrappers returns the function itself', () => {
+  const fn = () => 1;
+  assert.equal(decorate(fn), fn);
 });

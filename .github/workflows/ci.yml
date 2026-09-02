@@ -1,31 +1,74 @@
 name: ci
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ts:
+    name: ts (node ${{ matrix.node }})
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: packages/ts
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-      - run: npm ci || npm install
-      - run: npx tsc --noEmit
-      - run: npm test
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: packages/ts/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Pack (catches a broken "files" or "exports")
+        run: npm pack --dry-run
 
   py:
+    name: py (${{ matrix.python }})
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: packages/py
     strategy:
+      fail-fast: false
       matrix:
-        python: ['3.10', '3.13']
+        python: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m unittest discover -s tests -t .
+      - name: Test
+        run: python -m unittest discover -s tests -t . -v
+      - name: Build (catches a broken pyproject)
+        run: |
+          python -m pip install --quiet build
+          python -m build
+
+  ci-ok:
+    name: ci ok
+    if: always()
+    needs: [ts, py]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - run: echo "all green"
