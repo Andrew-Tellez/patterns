@@ -18,16 +18,16 @@ All 22 patterns of the catalog, one package per language, each idiomatic to that
 | Python | [`gof-patterns`](packages/py) — `pip install gof-patterns` | ✅ |
 | Kotlin / JVM (usable from Java) | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, release pipeline ready |
 | C# / .NET | [`gof-patterns`](packages/csharp) — `dotnet add package gof-patterns` | ✅ code, release pipeline ready |
-| Go | `packages/go` | planned |
+| Go | [`github.com/Andrew-Tellez/patterns/packages/go`](packages/go) | ✅ 100% coverage, `-race` clean |
 | Rust | `packages/rust` | planned |
 
-Go and Rust are planned rather than started because neither is a straight port. Go has no
-inheritance, so several patterns collapse into "pass a func" or "use a channel", and the
-honest package is smaller than the others. Rust's ownership rules change the shape of the
-answer outright: Observer needs `Rc<RefCell<…>>` or channels, Memento needs `Clone`, and
-Bridge's swappable reference needs interior mutability. Both are worth doing properly, and
-doing them badly would mean fighting the language and shipping code no Go or Rust developer
-would want.
+Rust is planned rather than started because it is not a straight port: ownership changes the
+shape of the answer outright — Observer needs `Rc<RefCell<…>>` or channels, Memento needs
+`Clone`, and Bridge's swappable reference needs interior mutability. Doing it badly would
+mean fighting the borrow checker and shipping code no Rust developer would want.
+
+Go needed no registry at all: `go get` resolves a version from a repository tag and the
+module proxy caches it, so releasing is a `git tag`.
 
 ## Principles
 

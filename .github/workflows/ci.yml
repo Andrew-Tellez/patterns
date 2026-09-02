@@ -122,10 +122,43 @@ jobs:
       - name: Pack (catches broken package metadata)
         run: dotnet pack src/GofPatterns/GofPatterns.csproj --configuration Release
 
+  go:
+    name: go (${{ matrix.go }})
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/go
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ['1.23', 'stable']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          # No go.sum: the module has no dependencies. setup-go hashes go.mod instead.
+          cache-dependency-path: packages/go/go.mod
+      - name: Format
+        run: test -z "$(gofmt -l .)" || { gofmt -l .; echo "run gofmt -w ."; exit 1; }
+      - name: Vet
+        run: go vet ./...
+      # -race because Singleton, Flyweight, Bridge and Subject are meant to be
+      # shared; a data race in them is the bug that matters most here.
+      - name: Test with the race detector and a coverage gate
+        run: |
+          go test -race -coverprofile=cover.out ./...
+          total="$(go tool cover -func=cover.out | awk '/^total:/ {print substr($3, 1, length($3) - 1)}')"
+          echo "coverage: $total%"
+          awk -v got="$total" 'BEGIN { exit !(got >= 99) }' \
+            || { echo "coverage $total% is below the 99% gate" >&2; exit 1; }
+      - name: Build
+        run: go build ./...
+
   ci-ok:
     name: ci ok
     if: always()
-    needs: [ts, py, kotlin, csharp]
+    needs: [ts, py, kotlin, csharp, go]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled
