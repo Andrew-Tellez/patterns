@@ -1,12 +1,4 @@
-"""Structural patterns.
-
-Three need no helper — see the README table:
-
-- Flyweight -> ``functools.lru_cache`` (shared instances per key, plus
-  ``cache_clear`` and ``cache_info`` for free)
-- Facade    -> an object that delegates. Just write it.
-- Bridge    -> pass the implementation in. Just write it.
-"""
+"""Structural patterns."""
 
 from __future__ import annotations
 
@@ -101,3 +93,91 @@ class lazy(Generic[T]):  # noqa: N801 - reads as a function at the call site
 
     def __setattr__(self, name: str, value: Any) -> None:
         setattr(self._resolve(), name, value)
+
+
+class Flyweight(Generic[T]):
+    """Flyweight — share one instance per key instead of re-creating equal objects.
+
+        tree_types = Flyweight(lambda name, color: TreeType(name, color))
+        tree_types["oak", "green"] is tree_types["oak", "green"]   # True
+
+    ``functools.lru_cache`` does the same and gives you ``cache_info()``; prefer it
+    when you own the factory function. This exists for a factory passed in at
+    runtime, and for a custom key — the ``key`` argument lets several different
+    argument tuples share one instance.
+    """
+
+    def __init__(
+        self,
+        factory: Callable[..., T],
+        key: Callable[..., Any] | None = None,
+    ) -> None:
+        self._factory = factory
+        self._key = key
+        self._cache: dict[Any, T] = {}
+
+    def __getitem__(self, args: Any) -> T:
+        args = args if isinstance(args, tuple) else (args,)
+        cache_key = self._key(*args) if self._key else args
+        if cache_key not in self._cache:
+            self._cache[cache_key] = self._factory(*args)
+        return self._cache[cache_key]
+
+    def __len__(self) -> int:
+        return len(self._cache)
+
+    def clear(self) -> None:
+        self._cache.clear()
+
+
+def facade(subsystems: dict[str, Callable[[], Any]], build: Callable[[Any], T]) -> T:
+    """Facade — one small interface over several subsystems, each built only if the
+    operation you called actually needs it.
+
+        checkout = facade(
+            {"payments": lambda: PaymentClient(key), "mail": lambda: Mailer(smtp)},
+            lambda parts: SimpleNamespace(
+                pay=lambda cents: parts.payments.charge(cents),
+                receipt=lambda to: parts.mail.send(to),
+            ),
+        )
+        checkout.pay(1999)   # Mailer was never constructed
+
+    Without the lazy part this would be ``build(parts)`` and not worth a helper.
+    With it, a facade over six subsystems costs one subsystem per call.
+    """
+
+    class _Parts:
+        def __getattr__(self, name: str) -> Any:
+            if name not in subsystems:
+                raise AttributeError(f"facade: no subsystem named {name!r}")
+            value = subsystems[name]()
+            setattr(self, name, value)  # built once
+            return value
+
+    return build(_Parts())
+
+
+class bridge(Generic[T]):  # noqa: N801 - reads as a function at the call site
+    """Bridge — a stable abstraction whose implementation can be swapped underneath.
+
+        storage = bridge(lambda impl: Api(save=impl.put), S3Storage())
+        store(storage)              # callers keep this reference forever
+        storage.swap(DiskStorage()) # and now they are writing to disk
+
+    The point is the stable reference: callers that captured ``storage`` follow the
+    swap. Passing the implementation into a constructor — the textbook version —
+    makes every caller re-wire when it changes.
+    """
+
+    __slots__ = ("_build", "_current")
+
+    def __init__(self, build: Callable[[Any], T], implementation: Any) -> None:
+        object.__setattr__(self, "_build", build)
+        object.__setattr__(self, "_current", build(implementation))
+
+    def swap(self, implementation: Any) -> None:
+        object.__setattr__(self, "_current", object.__getattribute__(self, "_build")(implementation))
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(object.__getattribute__(self, "_current"), name)

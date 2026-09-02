@@ -1,21 +1,31 @@
 import copy
 import functools
+import math
 import unittest
+from types import SimpleNamespace
 
 from gof_patterns import (
+    Builder,
     CommandBus,
     Composite,
     Do,
+    Flyweight,
     History,
     Mediator,
     Registry,
     StateMachine,
     Subject,
     adapt,
+    bridge,
     chain,
+    clone,
     decorate,
+    facade,
+    iterate,
     lazy,
+    singleton,
     template,
+    visitor,
 )
 
 
@@ -327,6 +337,159 @@ class TestParity(unittest.TestCase):
         )
         self.assertEqual(route("payload"), "end")
         self.assertEqual(seen, ["payload"])
+
+
+class TestCompletedCatalog(unittest.TestCase):
+    """The eight patterns that previously pointed at the stdlib instead of shipping code."""
+
+    def test_singleton_builds_once_and_resets(self):
+        calls = []
+        get = singleton(lambda: calls.append(1) or object())
+        self.assertIs(get(), get())
+        self.assertEqual(len(calls), 1)
+        get.reset()
+        get()
+        self.assertEqual(len(calls), 2)
+
+    def test_clone_is_deep(self):
+        source = {"a": {"b": 1}}
+        copied = clone(source)
+        copied["a"]["b"] = 2
+        self.assertEqual(source["a"]["b"], 1)
+
+    def test_builder_produces_a_dict_by_default(self):
+        self.assertEqual(Builder(size="M").cheese(True).size("L").build(), {"size": "L", "cheese": True})
+
+    def test_builder_calls_a_constructor(self):
+        class Pizza:
+            def __init__(self, size, cheese=False):
+                self.size, self.cheese = size, cheese
+
+        pizza = Builder(Pizza, size="M").size("L").cheese(True).build()
+        self.assertEqual((pizza.size, pizza.cheese), ("L", True))
+
+    def test_builder_set_handles_awkward_keys(self):
+        self.assertEqual(Builder().set(**{"content-type": "json"}).build(), {"content-type": "json"})
+
+    def test_flyweight_shares_one_instance_per_key(self):
+        built = []
+        types = Flyweight(lambda name, color: built.append(name) or (name, color))
+        self.assertIs(types["oak", "green"], types["oak", "green"])
+        self.assertEqual(len(built), 1)
+        self.assertIsNot(types["oak", "green"], types["pine", "green"])
+        self.assertEqual(len(types), 2)
+        types.clear()
+        self.assertEqual(len(types), 0)
+
+    def test_flyweight_honours_a_custom_key(self):
+        by_name = Flyweight(lambda name, color: (name, color), key=lambda name, color: name)
+        self.assertIs(by_name["oak", "green"], by_name["oak", "brown"])
+        self.assertEqual(len(by_name), 1)
+
+    def test_flyweight_accepts_a_single_argument(self):
+        types = Flyweight(lambda name: [name])
+        self.assertIs(types["oak"], types["oak"])
+
+    def test_facade_builds_a_subsystem_only_when_needed(self):
+        built = []
+
+        def payments():
+            built.append("payments")
+            return SimpleNamespace(charge=lambda cents: f"charged:{cents}")
+
+        def mail():
+            built.append("mail")
+            return SimpleNamespace(send=lambda to: f"sent:{to}")
+
+        checkout = facade(
+            {"payments": payments, "mail": mail},
+            lambda parts: SimpleNamespace(
+                pay=lambda cents: parts.payments.charge(cents),
+                receipt=lambda to: parts.mail.send(to),
+            ),
+        )
+
+        self.assertEqual(built, [])
+        self.assertEqual(checkout.pay(1999), "charged:1999")
+        self.assertEqual(built, ["payments"])
+        checkout.pay(1)
+        self.assertEqual(built, ["payments"])
+        self.assertEqual(checkout.receipt("a@b.c"), "sent:a@b.c")
+        self.assertEqual(built, ["payments", "mail"])
+
+    def test_facade_names_an_unknown_subsystem(self):
+        f = facade({}, lambda parts: parts)
+        with self.assertRaisesRegex(AttributeError, "no subsystem named"):
+            f.nope
+
+    def test_bridge_keeps_the_reference_stable_across_a_swap(self):
+        s3 = SimpleNamespace(put=lambda k, v: f"s3:{k}={v}")
+        disk = SimpleNamespace(put=lambda k, v: f"disk:{k}={v}")
+
+        storage = bridge(lambda impl: SimpleNamespace(save=impl.put), s3)
+        captured = storage
+
+        self.assertEqual(captured.save("a", "1"), "s3:a=1")
+        storage.swap(disk)
+        self.assertEqual(captured.save("a", "1"), "disk:a=1")
+
+    def test_visitor_dispatches_on_a_tag_field(self):
+        area = visitor({
+            "circle": lambda c: round(math.pi * c["r"] ** 2, 4),
+            "square": lambda s: s["side"] ** 2,
+        })
+        self.assertEqual(area({"type": "square", "side": 3}), 9)
+        self.assertEqual(area({"type": "circle", "r": 1}), 3.1416)
+
+        with self.assertRaisesRegex(KeyError, "no visitor for"):
+            area({"type": "hexagon"})
+
+        self.assertEqual(visitor({}, fallback=lambda n: -1)({"type": "x"}), -1)
+
+    def test_visitor_works_on_objects_and_a_custom_field(self):
+        node = SimpleNamespace(kind="leaf", value=2)
+        double = visitor({"leaf": lambda n: n.value * 2}, kind="kind")
+        self.assertEqual(double(node), 4)
+
+    def test_iterate_walks_an_external_cursor_lazily(self):
+        class Cursor:
+            def __init__(self, rows):
+                self.rows, self.i = rows, 0
+
+            def has_next(self):
+                return self.i < len(self.rows)
+
+            def next(self):
+                row = self.rows[self.i]
+                self.i += 1
+                return row
+
+        self.assertEqual(list(iterate(Cursor(["a", "b", "c"]))), ["a", "b", "c"])
+
+        cursor = Cursor(["a", "b", "c"])
+        for row in iterate(cursor):
+            if row == "b":
+                break
+        self.assertEqual(cursor.i, 2)  # never pulled "c"
+
+    def test_iterate_accepts_a_camelcase_sdk_cursor(self):
+        source = SimpleNamespace(rows=iter([1, 2]), hasNext=lambda: True)
+        pulled = []
+
+        class Sdk:
+            def __init__(self):
+                self.i = 0
+
+            def hasNext(self):  # noqa: N802 - mimicking a vendor SDK
+                return self.i < 2
+
+            def next(self):
+                self.i += 1
+                pulled.append(self.i)
+                return self.i
+
+        self.assertEqual(list(iterate(Sdk())), [1, 2])
+        self.assertEqual(pulled, [1, 2])
 
 
 if __name__ == "__main__":

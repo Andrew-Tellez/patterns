@@ -277,3 +277,27 @@ export function template<H extends Record<string, (...args: never[]) => unknown>
 
 // ponytail: Iterator is a generator function plus `for...of` — already in the
 // language, so there is no helper for it.
+
+/**
+ * Iterator — turn an external cursor into something `for...of` can walk.
+ *
+ * Database cursors, paginated HTTP APIs and vendor SDKs hand you a
+ * `hasNext()` / `next()` pair. This makes that a real iterable, so spread,
+ * destructuring, `for...of` and early `break` all work:
+ *
+ * ```ts
+ * for (const row of iterate(dbCursor)) {
+ *   if (row.id === target) break;   // the cursor stops here
+ * }
+ * ```
+ *
+ * Lazy: `next()` is called only when the consumer asks for the next value. If you
+ * are writing the source yourself, a generator function is simpler — this is for
+ * sources you did not write.
+ */
+export function iterate<T>(source: { hasNext(): boolean; next(): T }): IterableIterator<T> {
+  function* walk(): Generator<T> {
+    while (source.hasNext()) yield source.next();
+  }
+  return walk();
+}

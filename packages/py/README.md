@@ -29,45 +29,50 @@ provider that needs retries — and says which helper each one calls for.
 
 ## The catalog
 
-**Six of the 22 patterns are already in the standard library.** This package does not wrap
-them — the table tells you what to import instead.
+**All 22 patterns, all with a helper.** Several of them wrap something already in the standard
+library — those are here so the catalog is complete and so the API matches the other language
+packages. The Notes column says when to prefer the stdlib, and you usually should.
 
 ### Creational
 
-| Pattern | Use |
-| --- | --- |
-| Factory Method | `Registry()` — `register(key, creator)` / `create(key, *args)`, also a decorator |
-| Abstract Factory | `Registry()` — one registry per family |
-| Singleton | `functools.cache` on a zero-argument factory; `cache_clear()` for tests |
-| Prototype | `copy.deepcopy` |
-| Builder | keyword arguments with defaults, `dataclasses.replace` |
+| Pattern | Helper | Notes |
+| --- | --- | --- |
+| Singleton | `singleton(factory)` | `.reset()` for tests. Prefer `functools.cache` on a zero-argument function you own. |
+| Factory Method | `Registry()` | `register(key, creator)` / `create(key, *args)`, also a decorator. |
+| Abstract Factory | `Registry()` | One registry per family. |
+| Builder | `Builder(cls?, **defaults)` | Fluent setters, `.set(**kw)` for awkward keys. Prefer keyword arguments; this earns its place when construction is spread across branches. |
+| Prototype | `clone(value)` | Alias for `copy.deepcopy`. Use `copy.copy` for shallow, `dataclasses.replace` to copy with changes. |
 
 ### Structural
 
-| Pattern | Use |
-| --- | --- |
-| Adapter | `adapt(source, **methods)` |
-| Decorator | `decorate(fn, *wrappers)` — layers on an existing object, read left to right |
-| Composite | `Composite(value, children=None)` — `add`, `walk()`, `sum()`, `len()` |
-| Proxy | `lazy(loader)` — real object built on first attribute access |
-| Flyweight | `functools.lru_cache` — shared instances per key, plus `cache_info()` |
-| Facade | an object that delegates. Just write it. |
-| Bridge | pass the implementation in. Just write it. |
+| Pattern | Helper | Notes |
+| --- | --- | --- |
+| Adapter | `adapt(source, **methods)` | Returns a `SimpleNamespace`. |
+| Bridge | `bridge(build, impl)` | Stable reference; `swap(impl)` redirects every caller that already holds it. |
+| Composite | `Composite(value, children?)` | `add`, `walk()`, `sum()`, `len()` |
+| Decorator | `decorate(fn, *wrappers)` | `functools.wraps` applied for you. First wrapper is outermost. |
+| Facade | `facade(subsystems, build)` | Subsystems are built lazily — only the ones the called operation touches. |
+| Flyweight | `Flyweight(factory, key?)` | Prefer `functools.lru_cache` for a factory you own; use this for a custom key or a runtime factory. |
+| Proxy | `lazy(loader)` | Built on first attribute access. `functools.cached_property` when it hangs off an object you already have. |
 
 ### Behavioral
 
-| Pattern | Use |
-| --- | --- |
-| Chain of Responsibility | `chain(handlers, fallback=None)` — handlers take `(request, next)` |
-| Command | `CommandBus()` + `Do(do, undo=...)` — `run`, `undo`, `redo` |
-| Observer | `Subject[T]()` — `subscribe` returns the unsubscribe |
-| Mediator | `Mediator()` — `on` / `emit` hub |
-| Memento | `History(initial, limit=inf, snapshot=...)` — undo/redo |
-| State | `StateMachine(initial, states)` |
-| Strategy | `Registry()` — swap the registered implementation |
-| Template Method | `template(defaults, skeleton)` — override single steps, no subclass |
-| Visitor | `functools.singledispatch` — `area.register(Circle, ...)` |
-| Iterator | generators and `for` |
+| Pattern | Helper | Notes |
+| --- | --- | --- |
+| Chain of Responsibility | `chain(handlers, fallback=None)` | Handlers take `(request, next_)`. |
+| Command | `CommandBus()` + `Do(do, undo=...)` | `run`, `undo`, `redo` |
+| Iterator | `iterate(cursor)` | Wraps a `has_next`/`next` cursor (or camelCase, for SDKs). Writing your own source? Use a generator. |
+| Mediator | `Mediator()` | `on` / `emit` hub. |
+| Memento | `History(initial, limit, snapshot)` | Undo/redo over snapshots. |
+| Observer | `Subject[T]()` | `subscribe` returns the unsubscribe. |
+| State | `StateMachine(initial, states)` | |
+| Strategy | `Registry()` | Swap the registered implementation. |
+| Template Method | `template(defaults, skeleton)` | Unknown step names raise. |
+| Visitor | `visitor(visitors, fallback=None, kind="type")` | Dispatches on a **field**, for dicts from JSON. Prefer `functools.singledispatch` when your nodes are classes. |
+
+The original book describes 23 patterns; the Refactoring Guru catalog omits Interpreter, and
+so does this package — a general-purpose interpreter helper is a parser generator, not a
+pattern helper.
 
 ## Examples
 

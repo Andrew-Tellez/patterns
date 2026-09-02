@@ -30,8 +30,13 @@ one calls for.
 ## The catalog
 
 **Ten of the 22 patterns are already in the language.** This package does not wrap them —
-the table says what to write instead. That is the most Kotlin has taken off the list of any
-package here; Python drops eight, TypeScript five.
+the table says what to write instead.
+
+That is a deliberate difference from the TypeScript and Python packages, which ship a helper
+for all 22. In those languages a `singleton` or a `visitor` helper adds something; in Kotlin,
+`object` and `sealed interface` + `when` are shorter than any helper could be *and* checked by
+the compiler. Wrapping them would make the package worse. If you want the full set of names
+for consistency across languages, open an issue — it is a real trade-off, not a closed one.
 
 ### Creational
 

@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  adapt, builder, chain, clone, commandBus, composite, decorate, flyweight, history,
-  lazy, mediator, registry, singleton, stateMachine, subject, template, visitor,
+  adapt, bridge, builder, chain, clone, commandBus, composite, decorate, facade, flyweight,
+  history, iterate, lazy, mediator, registry, singleton, stateMachine, subject, template,
+  visitor,
 } from './index.ts';
 
 test('singleton builds once and resets', () => {
@@ -259,4 +260,66 @@ test('stateMachine accepts a dynamic target', () => {
 test('decorate with no wrappers returns the function itself', () => {
   const fn = () => 1;
   assert.equal(decorate(fn), fn);
+});
+
+test('facade builds a subsystem only when an operation needs it', () => {
+  const built: string[] = [];
+  const checkout = facade(
+    {
+      payments: () => {
+        built.push('payments');
+        return { charge: (cents: number) => `charged:${cents}` };
+      },
+      mail: () => {
+        built.push('mail');
+        return { send: (to: string) => `sent:${to}` };
+      },
+    },
+    (parts) => ({
+      pay: (cents: number) => parts.payments.charge(cents),
+      receipt: (to: string) => parts.mail.send(to),
+    }),
+  );
+
+  assert.deepEqual(built, []); // nothing built by declaring the facade
+  assert.equal(checkout.pay(1999), 'charged:1999');
+  assert.deepEqual(built, ['payments']); // mail still untouched
+  assert.equal(checkout.pay(1), 'charged:1');
+  assert.deepEqual(built, ['payments']); // and built once, not per call
+  assert.equal(checkout.receipt('a@b.c'), 'sent:a@b.c');
+  assert.deepEqual(built, ['payments', 'mail']);
+});
+
+test('bridge keeps the reference stable across a swap', () => {
+  type Store = { put(key: string, value: string): string };
+  const s3: Store = { put: (k, v) => `s3:${k}=${v}` };
+  const disk: Store = { put: (k, v) => `disk:${k}=${v}` };
+
+  const storage = bridge((impl: Store) => ({ save: (k: string, v: string) => impl.put(k, v) }), s3);
+  const captured = storage; // a caller that holds the reference forever
+
+  assert.equal(captured.save('a', '1'), 's3:a=1');
+  storage.swap(disk);
+  assert.equal(captured.save('a', '1'), 'disk:a=1');
+  assert.equal('save' in storage, true);
+});
+
+test('iterate turns an external cursor into an iterable and stays lazy', () => {
+  const makeCursor = () => {
+    let i = 0;
+    const rows = ['a', 'b', 'c'];
+    return {
+      pulled: () => i,
+      hasNext: () => i < rows.length,
+      next: () => rows[i++] as string,
+    };
+  };
+
+  assert.deepEqual([...iterate(makeCursor())], ['a', 'b', 'c']);
+
+  const cursor = makeCursor();
+  for (const row of iterate(cursor)) if (row === 'b') break;
+  assert.equal(cursor.pulled(), 2); // stopped at "b", never pulled "c"
+
+  assert.deepEqual([...iterate({ hasNext: () => false, next: () => 0 })], []);
 });

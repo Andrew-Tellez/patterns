@@ -328,9 +328,9 @@ raises instead of being silently ignored.
 - **One implementation, forever.** A registry with one entry, a chain with one handler, a
   strategy with one strategy. That is indirection, not design. Add it when the second case
   actually shows up.
-- **The standard library already has it.** Six of the 22 patterns have no helper in Python
-  and five none in TypeScript, on purpose — see
-  [Stdlib Equivalents](../../wiki/Stdlib-Equivalents).
+- **The standard library does it better.** All 22 have a helper, but for some of them the
+  language got there first — `functools.cache` over `singleton`, a generator over `iterate`.
+  [Stdlib Equivalents](../../wiki/Stdlib-Equivalents) lists every case and the condition.
 - **You need guarantees, not structure.** A `mediator` is not a queue, a `stateMachine` is
   not a transaction, and `history` is not persistence. These helpers organise code that runs
   in one process; durability is a different problem.

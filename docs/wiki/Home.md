@@ -18,8 +18,8 @@ not to.
   — ten situations from real code, with the snippets run as tests.
 - **[Choosing a Pattern](Choosing-a-Pattern)** — start from the symptom in your code, not
   from the pattern name.
-- **[Stdlib Equivalents](Stdlib-Equivalents)** — the patterns this project refuses to wrap,
-  and what to import instead.
+- **[Stdlib Equivalents](Stdlib-Equivalents)** — the patterns your standard library already
+  covers, and the condition that says which to reach for.
 - **[Porting to a New Language](Porting-to-a-New-Language)** — how a new package gets built.
 
 ## The one idea
@@ -31,6 +31,6 @@ keyed just so. That half is identical in every project, so it lives here.
 The interesting half — what a transition *means*, when a handler should answer — stays in
 your code, passed in as a function.
 
-Which is also why some entries in the catalog ship no code at all. A helper that saves you
-nothing is a dependency that costs you something. See
-[Stdlib Equivalents](Stdlib-Equivalents).
+All 22 entries ship code in TypeScript and Python. For some of them your standard library
+already does the job — [Stdlib Equivalents](Stdlib-Equivalents) is the list, with the
+condition that tells you which to reach for.

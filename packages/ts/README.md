@@ -28,45 +28,49 @@ provider that needs retries — and says which helper each one calls for.
 
 ## The catalog
 
+**All 22 patterns, all with a helper.** Where the language already has something better for
+the job, the Notes column says so — use it and skip the helper.
+
 ### Creational
 
-| Pattern | Helper |
-| --- | --- |
-| Singleton | `singleton(factory)` — one lazy instance, `.reset()` for tests |
-| Factory Method | `registry()` — `register(key, creator)` / `create(key, ...args)` |
-| Abstract Factory | `registry()` — one registry per family |
-| Builder | `builder<T>(defaults?, build?)` — fluent setters, no class |
-| Prototype | `clone(value)` — thin alias for `structuredClone` |
+| Pattern | Helper | Notes |
+| --- | --- | --- |
+| Singleton | `singleton(factory)` | One lazy instance. `.reset()` for tests. |
+| Factory Method | `registry()` | `register(key, creator)` / `create(key, ...args)` |
+| Abstract Factory | `registry()` | One registry per family. |
+| Builder | `builder<T>(defaults?, build?)` | Fluent setters, no class. |
+| Prototype | `clone(value)` | Alias for `structuredClone`; import that directly if it is all you need. Does not copy functions or class prototypes. |
 
 ### Structural
 
-| Pattern | Helper |
-| --- | --- |
-| Adapter | `adapt(source, methods)` |
-| Decorator | `decorate(fn, ...wrappers)` — retry/cache/log layers |
-| Composite | `composite(value, children?)` — `add`, `walk()`, `sum()` |
-| Flyweight | `flyweight(factory, key?)` — shared instances per key |
-| Proxy | `lazy(loader)` — real object built on first access |
-| Facade | *no helper* — an object that delegates. Just write it. |
-| Bridge | *no helper* — pass the implementation in. Just write it. |
+| Pattern | Helper | Notes |
+| --- | --- | --- |
+| Adapter | `adapt(source, methods)` | |
+| Bridge | `bridge(build, impl)` | Stable reference; `swap(impl)` redirects every caller that already holds it. |
+| Composite | `composite(value, children?)` | `add`, `walk()`, `sum()` |
+| Decorator | `decorate(fn, ...wrappers)` | Retry / cache / log layers. First wrapper is outermost. |
+| Facade | `facade(subsystems, build)` | Subsystems are built lazily — only the ones the called operation touches. |
+| Flyweight | `flyweight(factory, key?)` | Shared instances per key. |
+| Proxy | `lazy(loader)` | Real object built on first access. |
 
 ### Behavioral
 
-| Pattern | Helper |
-| --- | --- |
-| Chain of Responsibility | `chain(handlers, fallback?)` — `(req, next) => res`, sync or async |
-| Command | `commandBus()` — `run`, `undo`, `redo` |
-| Observer | `subject<T>()` — `subscribe` returns the unsubscribe |
-| Mediator | `mediator<Events>()` — typed `on` / `emit` hub |
-| Memento | `history(initial, { limit?, snapshot? })` — undo/redo |
-| State | `stateMachine({ initial, states })` |
-| Strategy | `registry()` — swap the registered implementation |
-| Visitor | `visitor(visitors, fallback?)` — dispatch on `node.type` |
-| Template Method | `template(defaults, skeleton)` — override single steps |
-| Iterator | *no helper* — generators and `for...of` are in the language |
+| Pattern | Helper | Notes |
+| --- | --- | --- |
+| Chain of Responsibility | `chain(handlers, fallback?)` | `(req, next) => res`, sync or async. |
+| Command | `commandBus()` | `run`, `undo`, `redo` |
+| Iterator | `iterate(cursor)` | Wraps a `hasNext`/`next` cursor into an iterable. Writing your own source? Use a generator instead. |
+| Mediator | `mediator<Events>()` | Typed `on` / `emit` hub. |
+| Memento | `history(initial, { limit?, snapshot? })` | Undo/redo over snapshots. |
+| Observer | `subject<T>()` | `subscribe` returns the unsubscribe. |
+| State | `stateMachine({ initial, states })` | |
+| Strategy | `registry()` | Swap the registered implementation. |
+| Template Method | `template(defaults, skeleton)` | Override single steps, no subclass. |
+| Visitor | `visitor(visitors, fallback?)` | Dispatch on `node.type`. |
 
-Five entries have no helper on purpose: a wrapper there would be more code to read
-than the pattern it hides. The table says what to write instead.
+The original book describes 23 patterns; the Refactoring Guru catalog omits Interpreter, and
+so does this package — a general-purpose interpreter helper is a parser generator, not a
+pattern helper.
 
 ## Examples
 

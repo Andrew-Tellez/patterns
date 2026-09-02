@@ -2,12 +2,18 @@
 
 Thanks for looking. This project has one strong opinion, and it shapes every review:
 
-> **A helper must earn its place.** If the language or its standard library already gives you
-> the pattern, we document that instead of wrapping it.
+> **Every helper has to add something.** The catalog is complete — TypeScript and Python cover
+> all 22 patterns — but a helper that only renames a standard-library feature is not finished.
 
-That is why Python has no `singleton` (it has `functools.cache`) and TypeScript has no
-`iterator` (it has generators). A PR that adds a wrapper around a stdlib feature will be
-turned down, kindly, with a pointer to the table entry it belongs in.
+Python's `singleton` exists next to `functools.cache` because it takes a factory in hand and
+matches the name the other packages use; its docstring tells you to prefer `functools.cache`
+when you own the function. `visitor` exists next to `functools.singledispatch` because it
+dispatches on a *field*, which is what JSON gives you. That is the bar: name the thing the
+stdlib does not do, in the docstring, in one sentence.
+
+Kotlin is the exception and stays at 12 helpers: `object`, `by lazy` and `sealed interface`
+are shorter than a helper *and* compiler-checked, so wrapping them would make the package
+worse.
 
 ## What makes a good pattern helper here
 
@@ -77,10 +83,11 @@ list. The rules:
 
 - **Same catalog, idiomatic names.** `stateMachine` in TypeScript, `StateMachine` in Python,
   `StateMachine` in Kotlin. Follow the language, not the other packages.
-- **Start by deleting.** Before writing a helper, check the standard library. Python dropped
-  eight of the 22 that way, and the README is better for it.
-- **Mirror the catalog table** in the package README, including the rows with no helper and
-  what to write instead.
+- **Check the standard library first.** Not to skip the helper — to know what it has to add,
+  and to write that sentence in the docstring. Where the language's own construct is shorter
+  *and* safer, as with Kotlin's `object`, the table entry is the answer.
+- **Mirror the catalog table** in the package README: all 22 rows, the helper for each, and a
+  Notes column saying when the language's own construct is the better choice.
 - **Standard-library test runner.** `node --test`, `unittest`, `kotlin.test`, `dotnet test`.
 - **Zero dependencies.**
 - Add a job to `.github/workflows/ci.yml`, a `[packages.<name>]` entry to `cog.toml`, and a

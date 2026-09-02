@@ -12,7 +12,10 @@ Patterns get misused when you start from the name. Start from the smell instead.
 | Two objects that do the same job with different method names | Adapter | `adapt` |
 | Cross-cutting noise (logging, retry, cache) copied into many functions | Decorator | `decorate` |
 | Nested `if (node.children)` recursion repeated in several places | Composite | `composite` / `Composite` |
-| Thousands of near-identical objects, mostly the same field values | Flyweight | `flyweight` (TS); `functools.lru_cache` (Python) |
+| Thousands of near-identical objects, mostly the same field values | Flyweight | `flyweight` / `Flyweight` |
+| A driver or SDK that hands you `hasNext()` / `next()` | Iterator | `iterate` |
+| Six subsystems behind one entry point, most calls touching one | Facade | `facade` |
+| An implementation you need to swap while callers hold the reference | Bridge | `bridge` |
 | An expensive object built at startup that most requests never touch | Proxy | `lazy` |
 | A validation or routing sequence with early exit, wired by hand | Chain of Responsibility | `chain` |
 | A feature request for undo | Command *or* Memento | `commandBus` / `history` |
@@ -20,7 +23,7 @@ Patterns get misused when you start from the name. Start from the smell instead.
 | A boolean pair like `isPaid` + `isShipped` that can be both false and both true | State | `stateMachine` / `StateMachine` |
 | Modules importing each other to notify each other | Observer or Mediator | `subject` / `mediator` |
 | Two functions that differ in one middle step | Template Method | `template` |
-| A `switch (node.type)` repeated for every new operation on a tree | Visitor | `visitor` (TS); `functools.singledispatch` (Python) |
+| A `switch (node.type)` repeated for every new operation on a tree | Visitor | `visitor` |
 
 ## Command or Memento?
 
@@ -62,4 +65,5 @@ row you find next week.
   implementer, a strategy registry with one strategy — that is indirection, not design. Add
   the pattern when the second case actually arrives.
 - **The pattern is bigger than the problem.** A `chain` of one handler is an `if`.
-- **The stdlib already has it.** See [Stdlib Equivalents](Stdlib-Equivalents).
+- **The stdlib does it better.** Every pattern has a helper, but for some of them the
+  language got there first. [Stdlib Equivalents](Stdlib-Equivalents) says which, and when.

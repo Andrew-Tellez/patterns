@@ -1,23 +1,27 @@
 # Stdlib Equivalents
 
-This project refuses to wrap what a language already gives you. The wrapper would be more
-code to read than the pattern it hides, plus a dependency, plus a name your team has to look
-up. So those catalog entries ship documentation instead of code.
+TypeScript and Python ship a helper for all 22 patterns. For several of them the standard
+library already does the job, and often does it better — this page is the list, so you can
+skip the helper when the language got there first.
 
-Five of the 22 have no helper in TypeScript. Eight have none in Python.
+Kotlin is different: it keeps 10 of the 22 as language features with no helper at all,
+because `object` and `sealed interface` + `when` are shorter than a helper *and* checked by
+the compiler.
 
 ## Python
 
-| Pattern | Import this |
-| --- | --- |
-| Singleton | `functools.cache` on a zero-argument factory. `db()` returns the same object every time; `db.cache_clear()` resets it for tests. |
-| Prototype | `copy.deepcopy` |
-| Builder | Keyword arguments with defaults, and `dataclasses.replace` for a modified copy. |
-| Flyweight | `functools.lru_cache` — shared instances per argument tuple, with `cache_info()` and `cache_clear()` included. |
-| Visitor | `functools.singledispatch` — `@area.register` per node type. Real type dispatch, not a string tag. |
-| Iterator | Generators and `for`. |
-| Facade | An object that delegates. Write it. |
-| Bridge | Pass the implementation into the constructor. Write it. |
+The helper exists in every row; prefer the import when the condition in the last column holds.
+
+| Pattern | Prefer this | When |
+| --- | --- | --- |
+| Singleton | `functools.cache` | You own the zero-argument function. `singleton()` is for a factory handed to you at runtime. |
+| Prototype | `copy.deepcopy` | Always, unless you are already importing the package. `clone` is a one-line alias. |
+| Builder | Keyword arguments, `dataclasses.replace` | The call site knows every field. `Builder` is for construction spread across `if` branches. |
+| Flyweight | `functools.lru_cache` | You own the factory and the default key works. `Flyweight` is for a runtime factory or a custom key. |
+| Visitor | `functools.singledispatch` | Your nodes are classes. `visitor()` dispatches on a *field*, which is what a decoded JSON payload gives you. |
+| Iterator | A generator function | You are writing the source. `iterate()` is for a cursor someone else wrote. |
+| Facade | An object that delegates | Two or three subsystems, all cheap. `facade()` pays off when they are expensive and rarely all needed. |
+| Bridge | Constructor injection | The implementation is chosen once at startup. `bridge()` is for swapping it while callers hold the reference. |
 
 ```python
 import functools
@@ -45,6 +49,7 @@ single-dispatch. Same catalog, different amount of code, on purpose.
 
 ## The rule for new languages
 
-Before writing a helper, go looking for it in the standard library. Every one you find is a
-row in this table, and the package gets better. Python lost eight helpers that way and reads
-more like Python for it.
+Go looking in the standard library before writing a helper — not to skip it, but to find out
+what the helper has to add, and to write that in one sentence in the docstring. If the
+language's own construct is shorter *and* safer, as Kotlin's `object` is, the row in this
+table is the whole answer.

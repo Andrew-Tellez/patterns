@@ -1,15 +1,9 @@
-"""Behavioral patterns.
-
-Two need no helper — see the README table:
-
-- Visitor  -> ``functools.singledispatch`` (dispatch on the node's type)
-- Iterator -> generators and ``for`` are in the language
-"""
+"""Behavioral patterns."""
 
 from __future__ import annotations
 
 import math
-from typing import Any, Callable, Generic, Protocol, TypeVar
+from typing import Any, Callable, Generic, Iterator, Protocol, TypeVar
 
 Req = TypeVar("Req")
 Res = TypeVar("Res")
@@ -293,3 +287,55 @@ def template(
         return run
 
     return with_overrides
+
+
+def visitor(
+    visitors: dict[str, Callable[[Any], Any]],
+    fallback: Callable[[Any], Any] | None = None,
+    kind: str = "type",
+) -> Callable[[Any], Any]:
+    """Visitor — dispatch on a node's tag instead of a ``match`` in every function.
+
+        area = visitor({
+            "circle": lambda c: math.pi * c["r"] ** 2,
+            "square": lambda s: s["side"] ** 2,
+        })
+        area({"type": "circle", "r": 1})
+
+    ``functools.singledispatch`` dispatches on the Python *class*, which is better
+    when your nodes are classes — prefer it there. This dispatches on a field
+    (``type`` by default), which is what you need for dicts decoded from JSON, rows
+    from a database, or any tagged union that never became a class hierarchy.
+    """
+
+    def visit(node: Any) -> Any:
+        tag = node.get(kind) if isinstance(node, dict) else getattr(node, kind, None)
+        handler = visitors.get(tag)
+        if handler is not None:
+            return handler(node)
+        if fallback is not None:
+            return fallback(node)
+        raise KeyError(f"visitor: no visitor for {tag!r}")
+
+    return visit
+
+
+def iterate(source: Any) -> Iterator[Any]:
+    """Iterator — turn an external cursor into something ``for`` can walk.
+
+    Database cursors, paginated HTTP APIs and vendor SDKs hand you a
+    ``has_next()`` / ``next()`` pair. This makes that a real iterator, so ``for``,
+    unpacking, ``list()`` and early ``break`` all work:
+
+        for row in iterate(db_cursor):
+            if row.id == target:
+                break          # the cursor stops here
+
+    Lazy: ``next()`` runs only when the consumer asks. If you are writing the source
+    yourself a generator is simpler — this is for sources you did not write. Accepts
+    ``has_next``/``next`` or the camelCase ``hasNext``/``next`` an SDK may expose.
+    """
+    has_next = getattr(source, "has_next", None) or getattr(source, "hasNext")
+    advance = getattr(source, "next")
+    while has_next():
+        yield advance()

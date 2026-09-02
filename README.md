@@ -9,21 +9,26 @@ Design patterns you can drop into real code — the
 [Gang of Four catalog](https://refactoring.guru/design-patterns/catalog) packaged as small
 typed helpers instead of textbook class diagrams to copy by hand.
 
-One package per language, each idiomatic to that language, same catalog and same names.
+All 22 patterns of the catalog, one package per language, each idiomatic to that language.
 
 | Language | Package | Status |
 | --- | --- | --- |
 | TypeScript / JavaScript | [`gof-patterns`](packages/ts) — `npm i gof-patterns` | ✅ |
 | Python | [`gof-patterns`](packages/py) — `pip install gof-patterns` | ✅ |
-| Kotlin / JVM | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, not published yet |
+| Kotlin / JVM | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, not published yet — 12 helpers, 10 patterns are language features |
 | C# | `packages/csharp` | planned |
 
 ## Principles
 
-- **A helper must earn its place.** Where the language or its standard library already has
-  the pattern, the README points at it instead of wrapping it: 5 patterns have no helper in
-  TypeScript, 8 in Python (`functools.cache`, `copy.deepcopy`, `functools.singledispatch`…),
-  10 in Kotlin (`object`, `by lazy`, `data class`, `sealed interface`, default arguments…).
+- **The whole catalog, and honest about it.** TypeScript and Python ship a helper for all 22
+  patterns. Several of them wrap something the standard library already does — the README says
+  which, and when you should prefer the stdlib (`functools.cache`, `structuredClone`,
+  `functools.singledispatch`). A complete catalog you can teach beats a tidy one with holes,
+  but you should still know when the language got there first.
+- **No helper is a bare wrapper.** Where the stdlib covers the common case, the helper adds
+  the part it does not: `facade` builds subsystems lazily, `Flyweight` takes a custom key,
+  `visitor` dispatches on a field so it works on JSON, `bridge` keeps a stable reference
+  across a swap.
 - **No dependencies**, in any language package.
 - **The pattern's plumbing, not your domain.** You pass in the behaviour; the helper handles
   the bookkeeping (history stacks, listener sets, transition tables, caches).
