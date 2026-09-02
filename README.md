@@ -80,6 +80,9 @@ package supports.
 - **[Examples](examples)** — one runnable problem per pattern: a `before` that reproduces the
   bug, an `after` that fixes it, and a `SCRIPT.md` walking through the change step by step for
   a video or a workshop. CI runs all of them.
+- **[Videos](videos)** — the same material rendered to MP4 with Remotion: the code being
+  typed, captions from the script, and terminal output copied from the runs in `examples/`.
+  No screen recording, so a typo is an edit and a re-render.
 - Package READMEs — the catalog table and every helper: [TypeScript](packages/ts/README.md) ·
   [Python](packages/py/README.md)
 - [Wiki](../../wiki) — when to reach for a pattern, and when not to. Written in

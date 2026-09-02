@@ -172,10 +172,29 @@ jobs:
       - name: Run every example
         run: ./examples/run-all.sh
 
+  videos:
+    name: videos (typecheck)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: videos
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: videos/package-lock.json
+      - run: npm ci
+      # Typecheck only. Rendering needs a headless Chrome download and minutes of
+      # CPU, which is not worth it per push — the MP4s are built on demand.
+      - name: Typecheck the compositions
+        run: npx tsc --noEmit
+
   ci-ok:
     name: ci ok
     if: always()
-    needs: [ts, py, kotlin, csharp, go, examples]
+    needs: [ts, py, kotlin, csharp, go, examples, videos]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled
