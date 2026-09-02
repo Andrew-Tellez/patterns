@@ -3,7 +3,7 @@
 [![ci](https://github.com/Andrew-Tellez/patterns/actions/workflows/ci.yml/badge.svg)](https://github.com/Andrew-Tellez/patterns/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/gof-patterns?label=npm)](https://www.npmjs.com/package/gof-patterns)
 [![PyPI](https://img.shields.io/pypi/v/gof-patterns?label=pypi)](https://pypi.org/project/gof-patterns/)
-[![coverage](https://img.shields.io/badge/coverage-100%25%20lines-brightgreen)](#coverage)
+[![coverage](https://img.shields.io/badge/coverage-%E2%89%A599%25%20lines-brightgreen)](#coverage)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Design patterns you can drop into real code — the
