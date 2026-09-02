@@ -15,14 +15,15 @@ One package per language, each idiomatic to that language, same catalog and same
 | --- | --- | --- |
 | TypeScript / JavaScript | [`gof-patterns`](packages/ts) — `npm i gof-patterns` | ✅ |
 | Python | [`gof-patterns`](packages/py) — `pip install gof-patterns` | ✅ |
-| Kotlin / Java | `packages/kotlin` | planned |
+| Kotlin / JVM | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, not published yet |
 | C# | `packages/csharp` | planned |
 
 ## Principles
 
 - **A helper must earn its place.** Where the language or its standard library already has
   the pattern, the README points at it instead of wrapping it: 5 patterns have no helper in
-  TypeScript, 8 in Python (`functools.cache`, `copy.deepcopy`, `functools.singledispatch`…).
+  TypeScript, 8 in Python (`functools.cache`, `copy.deepcopy`, `functools.singledispatch`…),
+  10 in Kotlin (`object`, `by lazy`, `data class`, `sealed interface`, default arguments…).
 - **No dependencies**, in any language package.
 - **The pattern's plumbing, not your domain.** You pass in the behaviour; the helper handles
   the bookkeeping (history stacks, listener sets, transition tables, caches).
