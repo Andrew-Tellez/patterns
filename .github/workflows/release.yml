@@ -14,7 +14,7 @@ permissions:
 jobs:
   npm:
     if: startsWith(github.ref, 'refs/tags/ts-v')
-    name: publish @andrew-tellez/patterns
+    name: publish gof-patterns (npm)
     runs-on: ubuntu-latest
     environment: release
     permissions:
@@ -51,7 +51,7 @@ jobs:
 
   pypi:
     if: startsWith(github.ref, 'refs/tags/py-v')
-    name: publish gof-patterns
+    name: publish gof-patterns (PyPI)
     runs-on: ubuntu-latest
     environment: release
     permissions:

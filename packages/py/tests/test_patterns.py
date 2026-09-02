@@ -2,7 +2,7 @@ import copy
 import functools
 import unittest
 
-from gof import (
+from gof_patterns import (
     CommandBus,
     Composite,
     Do,

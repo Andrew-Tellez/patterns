@@ -1,7 +1,7 @@
 # patterns
 
 [![ci](https://github.com/Andrew-Tellez/patterns/actions/workflows/ci.yml/badge.svg)](https://github.com/Andrew-Tellez/patterns/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@andrew-tellez/patterns?label=npm)](https://www.npmjs.com/package/@andrew-tellez/patterns)
+[![npm](https://img.shields.io/npm/v/gof-patterns?label=npm)](https://www.npmjs.com/package/gof-patterns)
 [![PyPI](https://img.shields.io/pypi/v/gof-patterns?label=pypi)](https://pypi.org/project/gof-patterns/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -13,7 +13,7 @@ One package per language, each idiomatic to that language, same catalog and same
 
 | Language | Package | Status |
 | --- | --- | --- |
-| TypeScript / JavaScript | [`@andrew-tellez/patterns`](packages/ts) — `npm i @andrew-tellez/patterns` | ✅ |
+| TypeScript / JavaScript | [`gof-patterns`](packages/ts) — `npm i gof-patterns` | ✅ |
 | Python | [`gof-patterns`](packages/py) — `pip install gof-patterns` | ✅ |
 | Kotlin / Java | `packages/kotlin` | planned |
 | C# | `packages/csharp` | planned |

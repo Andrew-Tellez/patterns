@@ -1,4 +1,4 @@
-# @andrew-tellez/patterns
+# gof-patterns
 
 The [Gang of Four catalog](https://refactoring.guru/design-patterns/catalog) as tiny, typed
 helpers. You write the domain logic; the pattern plumbing is already done.
@@ -6,11 +6,11 @@ helpers. You write the domain logic; the pattern plumbing is already done.
 Zero dependencies. ESM. ~6 kB packed.
 
 ```bash
-npm i @andrew-tellez/patterns
+npm i gof-patterns
 ```
 
 ```ts
-import { stateMachine, chain, singleton } from '@andrew-tellez/patterns';
+import { stateMachine, chain, singleton } from 'gof-patterns';
 
 const order = stateMachine({
   initial: 'draft',

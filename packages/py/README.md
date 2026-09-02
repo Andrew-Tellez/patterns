@@ -10,7 +10,7 @@ pip install gof-patterns
 ```
 
 ```python
-from gof import StateMachine
+from gof_patterns import StateMachine
 
 order = StateMachine("draft", {
     "draft": {"pay": "paid"},

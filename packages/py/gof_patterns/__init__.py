@@ -1,4 +1,4 @@
-"""gof-patterns — the GoF catalog as small, typed helpers.
+"""gof_patterns — the GoF catalog as small, typed helpers.
 
 MIT. https://refactoring.guru/design-patterns/catalog
 """

@@ -1,5 +1,5 @@
 /**
- * @andrew-tellez/patterns — the GoF catalog as tiny, typed helpers.
+ * gof-patterns — the GoF catalog as tiny, typed helpers.
  * MIT. https://refactoring.guru/design-patterns/catalog
  */
 export * from './creational.ts';

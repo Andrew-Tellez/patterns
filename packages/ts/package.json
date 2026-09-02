@@ -1,5 +1,5 @@
 {
-  "name": "@andrew-tellez/patterns",
+  "name": "gof-patterns",
   "version": "0.1.0",
   "description": "GoF design patterns as tiny, typed helpers. You supply the domain logic; the pattern plumbing is done.",
   "license": "MIT",

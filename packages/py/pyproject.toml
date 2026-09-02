@@ -25,4 +25,4 @@ Homepage = "https://github.com/Andrew-Tellez/patterns"
 Source = "https://github.com/Andrew-Tellez/patterns/tree/main/packages/py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["gof"]
+packages = ["gof_patterns"]

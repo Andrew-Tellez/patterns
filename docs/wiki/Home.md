@@ -4,8 +4,8 @@ The [Gang of Four catalog](https://refactoring.guru/design-patterns/catalog) as 
 helpers, one package per language, same catalog everywhere.
 
 ```bash
-npm i @andrew-tellez/patterns   # TypeScript / JavaScript
-pip install gof-patterns        # Python
+npm i gof-patterns   # TypeScript / JavaScript
+pip install gof-patterns  # Python
 ```
 
 The package READMEs are the reference: what each helper is called and how to call it. This

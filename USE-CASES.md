@@ -11,16 +11,16 @@ Every helper follows the same three rules, so learning one teaches you the rest.
    it happened.
 
 ```bash
-npm i @andrew-tellez/patterns   # TypeScript / JavaScript
-pip install gof-patterns        # Python
+npm i gof-patterns   # TypeScript / JavaScript
+pip install gof-patterns  # Python
 ```
 
 ```ts
-import { chain, stateMachine, decorate } from '@andrew-tellez/patterns';
+import { chain, stateMachine, decorate } from 'gof-patterns';
 ```
 
 ```python
-from gof import chain, StateMachine, decorate
+from gof_patterns import chain, StateMachine, decorate
 ```
 
 Every example below is executed as a test in
