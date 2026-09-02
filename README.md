@@ -77,6 +77,9 @@ package supports.
 
 - **[How to use it, and when](USE-CASES.md)** — thirteen situations from real code, the helper each
   one calls for, and when to reach for nothing at all. Every snippet runs as a test.
+- **[Examples](examples)** — one runnable problem per pattern: a `before` that reproduces the
+  bug, an `after` that fixes it, and a `SCRIPT.md` walking through the change step by step for
+  a video or a workshop. CI runs all of them.
 - Package READMEs — the catalog table and every helper: [TypeScript](packages/ts/README.md) ·
   [Python](packages/py/README.md)
 - [Wiki](../../wiki) — when to reach for a pattern, and when not to. Written in

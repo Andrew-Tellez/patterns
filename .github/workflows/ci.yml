@@ -155,10 +155,27 @@ jobs:
       - name: Build
         run: go build ./...
 
+  examples:
+    name: examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      # Each example asserts its own result, including the `before` files, which
+      # assert the bug the video opens with. If one stops reproducing, the script
+      # is lying and CI says so.
+      - name: Run every example
+        run: ./examples/run-all.sh
+
   ci-ok:
     name: ci ok
     if: always()
-    needs: [ts, py, kotlin, csharp, go]
+    needs: [ts, py, kotlin, csharp, go, examples]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled
