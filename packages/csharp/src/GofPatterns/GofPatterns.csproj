@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>GofPatterns</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- CS1591 wants an XML comment on every public member. The type-level docs carry
+         the explanation and an example; a one-line summary on CanUndo would be noise.
+         Every other warning is still an error. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- GofPatterns is taken on NuGet; gof-patterns keeps the name identical to
+         npm, PyPI and Maven Central. The namespace stays GofPatterns. -->
+    <PackageId>gof-patterns</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Andrew Tellez</Authors>
+    <Description>The 22 Gang of Four design patterns as small, typed helpers. No dependencies.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Andrew-Tellez/patterns</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Andrew-Tellez/patterns</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>design-patterns;gof;state-machine;observer;strategy;registry</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>

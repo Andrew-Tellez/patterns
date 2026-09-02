@@ -102,10 +102,30 @@ jobs:
               print(f"- {kind.title()}: {int(covered)}/{total} = {100 * int(covered) / total:.1f}%")
           EOF
 
+  csharp:
+    name: csharp (.NET ${{ matrix.dotnet }})
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/csharp
+    strategy:
+      fail-fast: false
+      matrix:
+        dotnet: ['8.0.x', '10.0.x']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+      - name: Test
+        run: dotnet test --configuration Release
+      - name: Pack (catches broken package metadata)
+        run: dotnet pack src/GofPatterns/GofPatterns.csproj --configuration Release
+
   ci-ok:
     name: ci ok
     if: always()
-    needs: [ts, py, kotlin]
+    needs: [ts, py, kotlin, csharp]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

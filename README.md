@@ -16,8 +16,18 @@ All 22 patterns of the catalog, one package per language, each idiomatic to that
 | --- | --- | --- |
 | TypeScript / JavaScript | [`gof-patterns`](packages/ts) — `npm i gof-patterns` | ✅ |
 | Python | [`gof-patterns`](packages/py) — `pip install gof-patterns` | ✅ |
-| Kotlin / JVM | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, not published yet — 12 helpers, 10 patterns are language features |
-| C# | `packages/csharp` | planned |
+| Kotlin / JVM (usable from Java) | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, not published yet |
+| C# / .NET | [`gof-patterns`](packages/csharp) — `dotnet add package gof-patterns` | ✅ code, not published yet |
+| Go | `packages/go` | planned |
+| Rust | `packages/rust` | planned |
+
+Go and Rust are planned rather than started because neither is a straight port. Go has no
+inheritance, so several patterns collapse into "pass a func" or "use a channel", and the
+honest package is smaller than the others. Rust's ownership rules change the shape of the
+answer outright: Observer needs `Rc<RefCell<…>>` or channels, Memento needs `Clone`, and
+Bridge's swappable reference needs interior mutability. Both are worth doing properly, and
+doing them badly would mean fighting the language and shipping code no Go or Rust developer
+would want.
 
 ## Principles
 
