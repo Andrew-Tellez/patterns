@@ -25,7 +25,8 @@ worse.
 4. **Typed.** Wrong usage should fail at the type checker where the language allows it, and
    raise a clear error where it does not.
 5. **One runnable check.** Every behaviour gets a test with the language's *standard library*
-   test runner. No test frameworks.
+   test runner. No test frameworks. Coverage is gated in CI, so an untested branch fails the
+   build rather than waiting to be noticed.
 
 ## Setup
 
@@ -39,6 +40,7 @@ cd packages/ts
 npm ci
 npx tsc --noEmit     # typecheck
 npm test             # node --test
+npm run coverage     # the same tests, with the thresholds CI enforces
 npm run build        # tsc -> dist/
 ```
 
@@ -47,6 +49,17 @@ npm run build        # tsc -> dist/
 ```bash
 cd packages/py
 python3 -m unittest discover -s tests -t . -v
+python3 -m coverage run --source=gof_patterns -m unittest discover -s tests -t .
+python3 -m coverage report -m --fail-under=100
+```
+
+**Kotlin** (`packages/kotlin`) — needs a JDK 17 or newer. The Gradle wrapper is committed, so
+nothing else needs installing.
+
+```bash
+cd packages/kotlin
+./gradlew test
+./gradlew build      # includes the JaCoCo coverage gate
 ```
 
 ## Commits
@@ -66,9 +79,10 @@ release note.
 
 ## Pull requests
 
-CI must be green: `ts` on Node 22 and 24, `py` on Python 3.10 through 3.13. Both jobs also
-build the package, which is what catches a broken `exports` map or `pyproject.toml` before a
-release does.
+CI must be green: `ts` on Node 22 and 24, `py` on Python 3.10 through 3.13, `kotlin` on JDK
+17 and 25. Every job also builds the package — that is what catches a broken `exports` map or
+`pyproject.toml` before a release does — and enforces the coverage gate, so a new helper
+without tests turns the build red.
 
 For a change to a helper, the PR should say:
 

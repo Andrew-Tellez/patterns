@@ -4,7 +4,9 @@
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { adapt, chain, commandBus, decorate, mediator, registry, stateMachine } from './index.ts';
+import {
+  adapt, bridge, chain, commandBus, decorate, facade, iterate, mediator, registry, stateMachine,
+} from './index.ts';
 
 test('use case: one webhook endpoint, several provider payload shapes', () => {
   type Incoming = { source: string; amount?: number; data?: { total?: number } };
@@ -130,4 +132,64 @@ test('use case: one business event, several side effects', () => {
     'email:inv_1', 'analytics:1999', 'ledger:inv_1',
     'email:inv_2', 'analytics:500',
   ]);
+});
+
+test('use case: six subsystems, and most calls need one', () => {
+  const built: string[] = [];
+  const checkout = facade(
+    {
+      payments: () => {
+        built.push('payments');
+        return { charge: (cents: number) => `charged:${cents}` };
+      },
+      mail: () => {
+        built.push('mail');
+        return { send: (to: string) => `sent:${to}` };
+      },
+      ledger: () => {
+        built.push('ledger');
+        return { write: (id: string) => `wrote:${id}` };
+      },
+    },
+    (parts) => ({
+      pay: (cents: number) => parts.payments.charge(cents),
+      receipt: (to: string) => parts.mail.send(to),
+    }),
+  );
+
+  assert.equal(checkout.pay(1999), 'charged:1999');
+  assert.deepEqual(built, ['payments']); // Mailer and Ledger never constructed
+});
+
+test('use case: swapping a backend while callers hold the reference', () => {
+  type Storage = { put(key: string, value: string): string };
+  const s3: Storage = { put: (k, v) => `s3:${k}=${v}` };
+  const disk: Storage = { put: (k, v) => `disk:${k}=${v}` };
+
+  const storage = bridge(
+    (impl: Storage) => ({ save: (k: string, v: string) => impl.put(k, v) }),
+    s3,
+  );
+
+  const registered = storage; // captured here, forever
+  assert.equal(registered.save('a', '1'), 's3:a=1');
+  storage.swap(disk);
+  assert.equal(registered.save('a', '1'), 'disk:a=1');
+});
+
+test('use case: a driver cursor you want to loop over', () => {
+  const cursor = (() => {
+    const rows = [{ id: 1 }, { id: 2 }, { id: 3 }];
+    let i = 0;
+    return { pulled: () => i, hasNext: () => i < rows.length, next: () => rows[i++]! };
+  })();
+
+  for (const row of iterate(cursor)) if (row.id === 2) break;
+  assert.equal(cursor.pulled(), 2); // stopped pulling at the match
+
+  const fresh = (() => {
+    let n = 0;
+    return { hasNext: () => n < 100, next: () => n++ };
+  })();
+  assert.deepEqual([...iterate(fresh)].slice(0, 3), [0, 1, 2]);
 });

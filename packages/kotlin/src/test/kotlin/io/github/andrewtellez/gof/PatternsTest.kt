@@ -76,6 +76,17 @@ class StructuralTest {
     }
 
     @Test
+    fun `composite add appends and exposes children read-only`() {
+        val root = Composite("a")
+        assertEquals(emptyList(), root.children)
+
+        val returned = root.add(Composite("b"), Composite("c"))
+        assertSame(root, returned) // chainable
+        assertEquals(listOf("b", "c"), root.children.map { it.value })
+        assertEquals(3, root.size)
+    }
+
+    @Test
     fun `composite walk is lazy and depth first`() {
         val root = Composite("a", listOf(Composite("b", listOf(Composite("c")))))
         assertEquals(listOf("a", "b", "c"), root.walk().map { it.value }.toList())
@@ -189,6 +200,11 @@ class BehavioralTest {
     }
 
     @Test
+    fun `a mediator channel keeps its name for debugging`() {
+        assertEquals("invoice.paid", Mediator.Channel<Int>("invoice.paid").name)
+    }
+
+    @Test
     fun `history undoes, redoes and drops the future on save`() {
         val history = History("")
         history.save("a")
@@ -252,6 +268,40 @@ class BehavioralTest {
     }
 
     private enum class Status { DRAFT, PAID }
+
+    @Test
+    fun `empty stacks and the flags that report them`() {
+        val bus = CommandBus()
+        assertFalse(bus.canUndo)
+        assertFalse(bus.canRedo)
+        assertFalse(bus.undo())
+        assertFalse(bus.redo())
+
+        bus.run(Command({ 1 }, undo = {}))
+        assertTrue(bus.canUndo)
+        assertTrue(bus.undo())
+        assertTrue(bus.canRedo)
+
+        val history = History("a")
+        assertFalse(history.canUndo)
+        assertFalse(history.canRedo)
+        assertNull(history.redo())
+        history.save("b")
+        assertTrue(history.canUndo)
+        history.undo()
+        assertTrue(history.canRedo)
+        assertEquals("b", history.redo())
+    }
+
+    @Test
+    fun `can() is false for an unknown state and for an unknown event`() {
+        val machine = StateMachine("draft", mapOf("draft" to mapOf("pay" to "paid")))
+        assertTrue(machine.can("pay"))
+        assertFalse(machine.can("ship"))       // state known, event not
+        machine.send("pay")
+        assertFalse(machine.can("ship"))       // state absent from the table entirely
+        assertFailsWith<IllegalStateException> { machine.send("ship") }
+    }
 
     @Test
     fun `default arguments are the template method, no helper needed`() {

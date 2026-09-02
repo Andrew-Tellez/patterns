@@ -11,9 +11,12 @@ Every helper follows the same three rules, so learning one teaches you the rest.
    it happened.
 
 ```bash
-npm i gof-patterns   # TypeScript / JavaScript
+npm i gof-patterns        # TypeScript / JavaScript
 pip install gof-patterns  # Python
 ```
+
+Kotlin/JVM is in [`packages/kotlin`](packages/kotlin) and not published to Maven Central yet;
+build it from source in the meantime.
 
 ```ts
 import { chain, stateMachine, decorate } from 'gof-patterns';
@@ -21,6 +24,10 @@ import { chain, stateMachine, decorate } from 'gof-patterns';
 
 ```python
 from gof_patterns import chain, StateMachine, decorate
+```
+
+```kotlin
+import io.github.andrewtellez.gof.chain
 ```
 
 Every example below is executed as a test in
@@ -41,6 +48,9 @@ stops working, CI fails.
 | [A heavy client most requests never touch](#a-heavy-client-most-requests-never-touch) | `lazy` |
 | [A tree you keep writing recursion over](#a-tree-you-keep-writing-recursion-over) | `composite` |
 | [Two reports that differ in one step](#two-reports-that-differ-in-one-step) | `template` |
+| [Six subsystems, and most calls need one](#six-subsystems-and-most-calls-need-one) | `facade` |
+| [Swapping a backend while callers hold the reference](#swapping-a-backend-while-callers-hold-the-reference) | `bridge` |
+| [A driver cursor you want to loop over](#a-driver-cursor-you-want-to-loop-over) | `iterate` |
 
 ---
 
@@ -320,6 +330,88 @@ sees exactly what is different about the monthly report without diffing two file
 
 **Python:** `template({...}, skeleton)`, then `report(parse=parse_json)`. An unknown step name
 raises instead of being silently ignored.
+
+---
+
+### Six subsystems, and most calls need one
+
+A checkout service talks to payments, mail, ledger, analytics, inventory and a CRM.
+Constructing all six at startup is slow and makes tests drag in six clients, even when the
+endpoint under test touches one.
+
+```ts
+const checkout = facade(
+  {
+    payments: () => new PaymentClient(key),
+    mail: () => new Mailer(smtp),
+    ledger: () => new Ledger(db),
+  },
+  (parts) => ({
+    pay: (cents: number) => parts.payments.charge(cents),
+    receipt: (to: string) => parts.mail.send(to),
+  }),
+);
+
+checkout.pay(1999);  // Mailer and Ledger were never constructed
+```
+
+Each subsystem is built on first use and reused after that. The facade is also the only file
+that knows how many subsystems there are, which is the point of the pattern.
+
+**Python:** `facade({"payments": lambda: ..., }, lambda parts: ...)`.
+
+**Not this instead?** With two cheap subsystems, an object that delegates is shorter. The
+lazy construction is what makes the helper worth it.
+
+---
+
+### Swapping a backend while callers hold the reference
+
+Storage moves from S3 to disk during a migration, and you want to flip it at runtime — a
+feature flag, a failover, a test that redirects writes. Constructor injection means every
+holder of the old instance keeps writing to S3.
+
+```ts
+const storage = bridge(
+  (impl: Storage) => ({ save: (k: string, v: string) => impl.put(k, v) }),
+  new S3Storage(),
+);
+
+register(storage);              // captured here, forever
+storage.swap(new DiskStorage()); // and that captured reference now writes to disk
+```
+
+The abstraction is a stable object; the implementation behind it is not. That is exactly the
+split Bridge is about, and the reason to prefer this over passing the implementation in.
+
+**Python:** `bridge(lambda impl: ..., S3Storage())`, then `storage.swap(DiskStorage())`.
+
+**Not this instead?** If the implementation is chosen once at startup and never changes,
+constructor injection is simpler and you should use it.
+
+---
+
+### A driver cursor you want to loop over
+
+A database driver or a vendor SDK hands you `hasNext()` / `next()`. Consuming it means a
+`while` loop, and pulling it into an array to use `filter` defeats the point of a cursor.
+
+```ts
+for (const row of iterate(dbCursor)) {
+  if (row.id === target) break;  // the cursor stops pulling here
+}
+
+const firstFive = [...iterate(cursor)].slice(0, 5);
+```
+
+`iterate` is lazy: `next()` runs only when the consumer asks, so a `break` or a `find` stops
+fetching. Nothing is buffered.
+
+**Python:** `for row in iterate(db_cursor)`, and it accepts the camelCase `hasNext` an SDK
+may expose.
+
+**Not this instead?** If you are writing the source yourself, a generator function is simpler
+and needs no helper. This is for sources you did not write.
 
 ---
 

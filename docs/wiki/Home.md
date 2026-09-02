@@ -15,7 +15,7 @@ not to.
 ## Pages
 
 - **[How to use it, and when](https://github.com/Andrew-Tellez/patterns/blob/main/USE-CASES.md)**
-  — ten situations from real code, with the snippets run as tests.
+  — thirteen situations from real code, with the snippets run as tests.
 - **[Choosing a Pattern](Choosing-a-Pattern)** — start from the symptom in your code, not
   from the pattern name.
 - **[Stdlib Equivalents](Stdlib-Equivalents)** — the patterns your standard library already

@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     kotlin("jvm") version "2.4.10"
+    // Core Gradle plugin, so coverage costs no dependency.
+    jacoco
 }
 
 group = "io.github.andrew-tellez"
@@ -36,4 +38,35 @@ java {
 tasks.test {
     useJUnitPlatform()
     testLogging { events("passed", "failed", "skipped") }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// Thresholds sit just under what the suite reaches, so a real regression fails the
+// build but a refactor that shifts one branch does not.
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                minimum = "0.99".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                minimum = "0.95".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }

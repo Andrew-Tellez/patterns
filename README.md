@@ -3,6 +3,7 @@
 [![ci](https://github.com/Andrew-Tellez/patterns/actions/workflows/ci.yml/badge.svg)](https://github.com/Andrew-Tellez/patterns/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/gof-patterns?label=npm)](https://www.npmjs.com/package/gof-patterns)
 [![PyPI](https://img.shields.io/pypi/v/gof-patterns?label=pypi)](https://pypi.org/project/gof-patterns/)
+[![coverage](https://img.shields.io/badge/coverage-100%25%20lines-brightgreen)](#coverage)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Design patterns you can drop into real code — the
@@ -35,9 +36,31 @@ All 22 patterns of the catalog, one package per language, each idiomatic to that
 - **Typed.** A state machine with no `ship` transition fails at the type checker where the
   language allows it, and loudly at runtime everywhere else.
 
+## Coverage
+
+Every package is at or near full coverage, and CI fails the build if it slips. The tools are
+the ones already in the toolchain — Node's built-in coverage, `coverage.py`, JaCoCo — so this
+costs no runtime dependency and no third-party service.
+
+| Package | Tests | Lines | Branches | Gate enforced in CI |
+| --- | --- | --- | --- | --- |
+| TypeScript | 40 | 100% | 98.2% | lines 100%, branches 95%, functions 90% |
+| Python | 45 | 100% | — | lines 100% (`--fail-under=100`) |
+| Kotlin | 23 | 100% | 97.7% | lines 99%, branches 95% |
+
+```bash
+cd packages/ts     && npm run coverage
+cd packages/py     && python3 -m coverage run --source=gof_patterns -m unittest discover -s tests -t . && python3 -m coverage report -m
+cd packages/kotlin && ./gradlew jacocoTestCoverageVerification
+```
+
+The badge tracks the enforced gate rather than a live measurement: coverage cannot fall below
+it without the build going red, so there is no third-party service in the loop. Add Codecov if
+you want per-commit numbers and a diff view on pull requests.
+
 ## Documentation
 
-- **[How to use it, and when](USE-CASES.md)** — ten situations from real code, the helper each
+- **[How to use it, and when](USE-CASES.md)** — thirteen situations from real code, the helper each
   one calls for, and when to reach for nothing at all. Every snippet runs as a test.
 - Package READMEs — the catalog table and every helper: [TypeScript](packages/ts/README.md) ·
   [Python](packages/py/README.md)

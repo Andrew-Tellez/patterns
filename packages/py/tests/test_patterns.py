@@ -472,6 +472,27 @@ class TestCompletedCatalog(unittest.TestCase):
                 break
         self.assertEqual(cursor.i, 2)  # never pulled "c"
 
+    def test_builder_does_not_intercept_dunder_lookups(self):
+        # __getattr__ must not turn copy.deepcopy's protocol probes into setters.
+        b = Builder(size="M")
+        with self.assertRaises(AttributeError):
+            b.__deepcopy__
+        self.assertEqual(b.build(), {"size": "M"})
+
+    def test_command_bus_redo_on_an_empty_stack(self):
+        bus = CommandBus()
+        self.assertFalse(bus.redo())
+
+    def test_history_redo_on_an_empty_future(self):
+        h = History("a")
+        self.assertIsNone(h.redo())
+
+    def test_state_machine_exposes_the_current_state(self):
+        machine = StateMachine("draft", {"draft": {"pay": "paid"}, "paid": {}})
+        self.assertEqual(machine.state, "draft")
+        machine.send("pay")
+        self.assertEqual(machine.state, "paid")
+
     def test_iterate_accepts_a_camelcase_sdk_cursor(self):
         source = SimpleNamespace(rows=iter([1, 2]), hasNext=lambda: True)
         pulled = []
