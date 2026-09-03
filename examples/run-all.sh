@@ -9,6 +9,17 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 failed=0
 
+# Node strips types rather than checking them, so the examples need a real
+# typecheck — that is what verifies the @ts-expect-error in 06-observer, whose
+# whole point is a compile-time guarantee.
+TSC=packages/ts/node_modules/.bin/tsc
+if [ -x "$TSC" ]; then
+  printf '  %-52s' 'tsc --noEmit -p examples/tsconfig.json'
+  if "$TSC" --noEmit -p examples/tsconfig.json >/dev/null 2>&1; then echo 'ok'; else echo 'FAILED'; failed=1; fi
+else
+  echo '  (skipping typecheck: run npm ci in packages/ts first)'
+fi
+
 for file in examples/*/before.ts examples/*/after.ts; do
   printf '  node %-44s' "$file"
   if node "$file" >/dev/null 2>&1; then echo 'ok'; else echo 'FAILED'; failed=1; fi

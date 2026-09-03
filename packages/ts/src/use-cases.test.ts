@@ -5,7 +5,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  adapt, bridge, chain, commandBus, decorate, facade, iterate, mediator, registry, stateMachine,
+  adapt, bridge, builder, chain, clone, commandBus, decorate, facade, flyweight, iterate,
+  mediator, registry, singleton, stateMachine, visitor,
 } from './index.ts';
 
 test('use case: one webhook endpoint, several provider payload shapes', () => {
@@ -192,4 +193,110 @@ test('use case: a driver cursor you want to loop over', () => {
     return { hasNext: () => n < 100, next: () => n++ };
   })();
   assert.deepEqual([...iterate(fresh)].slice(0, 3), [0, 1, 2]);
+});
+
+test('use case: a client rebuilt on every request', () => {
+  let pools = 0;
+  const stripe = singleton(() => {
+    pools += 1;
+    return { charges: { create: (cents: number) => `ch_${cents}` } };
+  });
+
+  // Four call sites across one request, one connection pool.
+  assert.equal(stripe().charges.create(1999), 'ch_1999');
+  assert.equal(stripe().charges.create(1), 'ch_1');
+  stripe();
+  stripe();
+  assert.equal(pools, 1);
+
+  // The part people skip: without this, a client cached in a module-level
+  // variable leaks from one test into the next.
+  stripe.reset();
+  stripe();
+  assert.equal(pools, 2);
+});
+
+test('use case: a query assembled from optional filters', () => {
+  type Query = { table: string; user: string; since: string };
+
+  const userId = 'u1';
+  const since = undefined as string | undefined;
+
+  // Construction is interruptible: the builder survives being handed to a branch.
+  const filters = builder<Query>({ table: 'orders' });
+  if (userId) filters.user(userId);
+  if (since) filters.since(since);
+
+  assert.deepEqual(filters.build(), { table: 'orders', user: 'u1' });
+});
+
+test('use case: an expensive default you keep rebuilding', () => {
+  const template = { locale: 'es-MX', sections: ['header'], footer: { page: 1 } };
+
+  const monthly = clone(template);
+  monthly.sections.push('summary');
+  monthly.footer.page = 2;
+
+  assert.deepEqual(template.sections, ['header'], 'the original is untouched');
+  assert.equal(template.footer.page, 1);
+
+  // The trap this avoids: a spread shares the nested arrays.
+  const shallow = { ...template };
+  shallow.sections.push('oops');
+  assert.deepEqual(template.sections, ['header', 'oops'], 'a spread does not protect you');
+});
+
+test('use case: thousands of objects that are mostly the same', () => {
+  let built = 0;
+  const species = flyweight((name: string, texture: string) => {
+    built += 1;
+    return { name, texture };
+  });
+
+  const positions = Array.from({ length: 1000 }, (_, i) => i);
+  const trees = positions.map((position) => ({
+    position,
+    species: species('oak', 'oak.png'),
+  }));
+
+  assert.equal(trees.length, 1000);
+  assert.equal(built, 1, 'one shared species for a thousand trees');
+  assert.equal(trees[0]!.species, trees[999]!.species);
+
+  // Same shape for formatters: expensive to construct, few in number.
+  const money = flyweight((locale: string, currency: string) =>
+    new Intl.NumberFormat(locale, { style: 'currency', currency }));
+  assert.equal(money('es-MX', 'MXN'), money('es-MX', 'MXN'));
+});
+
+test('use case: a new operation over a tagged payload', () => {
+  type Node =
+    | { type: 'charge'; cents: number }
+    | { type: 'refund'; cents: number }
+    | { type: 'fee'; cents: number };
+
+  const total = visitor<Node, number>({
+    charge: (n) => n.cents,
+    refund: (n) => -n.cents,
+    fee: (n) => -n.cents,
+  });
+
+  const describe = visitor<Node, string>({
+    charge: (n) => `cobro de ${n.cents}`,
+    refund: (n) => `reembolso de ${n.cents}`,
+    fee: (n) => `comisión de ${n.cents}`,
+  });
+
+  const nodes: Node[] = [
+    { type: 'charge', cents: 2000 },
+    { type: 'fee', cents: 60 },
+    { type: 'refund', cents: 500 },
+  ];
+
+  assert.equal(nodes.reduce((sum, node) => sum + total(node), 0), 1440);
+  assert.equal(describe(nodes[0]!), 'cobro de 2000');
+
+  // A type nobody handled throws with the tag, instead of a silent default.
+  const partial = visitor<Node, number>({ charge: (n) => n.cents });
+  assert.throws(() => partial({ type: 'fee', cents: 1 }), /no visitor for "fee"/);
 });

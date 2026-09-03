@@ -51,6 +51,11 @@ stops working, CI fails.
 | [Six subsystems, and most calls need one](#six-subsystems-and-most-calls-need-one) | `facade` |
 | [Swapping a backend while callers hold the reference](#swapping-a-backend-while-callers-hold-the-reference) | `bridge` |
 | [A driver cursor you want to loop over](#a-driver-cursor-you-want-to-loop-over) | `iterate` |
+| [A client rebuilt on every request](#a-client-rebuilt-on-every-request) | `singleton` |
+| [A query assembled from optional filters](#a-query-assembled-from-optional-filters) | `builder` |
+| [An expensive default you keep rebuilding](#an-expensive-default-you-keep-rebuilding) | `clone` |
+| [Thousands of objects that are mostly the same](#thousands-of-objects-that-are-mostly-the-same) | `flyweight` |
+| [A new operation over a tagged payload](#a-new-operation-over-a-tagged-payload) | `visitor` |
 
 ---
 
@@ -412,6 +417,152 @@ may expose.
 
 **Not this instead?** If you are writing the source yourself, a generator function is simpler
 and needs no helper. This is for sources you did not write.
+
+---
+
+### A client rebuilt on every request
+
+A handler calls `getStripeClient()`, and so do three other places in the same request. Each
+call constructs a client with its own connection pool. Under load you run out of sockets, and
+the profile blames the wrong thing.
+
+```ts
+const stripe = singleton(() => new Stripe(apiKey, { maxNetworkRetries: 2 }));
+
+app.post('/charge', () => stripe().charges.create(...));
+app.post('/refund', () => stripe().refunds.create(...));
+```
+
+The construction moves to the first call that needs it, and every caller shares the pool. The
+`reset()` is the part people skip: without it, a client cached in a module-level variable
+leaks from one test into the next, and you get a suite that passes file by file and fails as a
+whole.
+
+**Python:** `singleton(build_client)`, or `functools.cache` when the function is yours to
+decorate — prefer that one.
+
+**Not this instead?** If it is cheap to construct and holds no connection, just construct it.
+This pays when construction is expensive or holds a resource.
+
+---
+
+### A query assembled from optional filters
+
+A search endpoint takes five optional parameters. Building the query means five `if` blocks
+that each mutate a growing object, and the shape of the result is impossible to see at a
+glance.
+
+```ts
+const query = builder<Query>({ table: 'orders' })
+  .user(userId)
+  .build();
+
+// or, when the fields are conditional:
+const filters = builder<Query>({ table: 'orders' });
+if (userId) filters.user(userId);
+if (since) filters.since(since);
+const built = filters.build();
+```
+
+The value is that construction is *interruptible*: you can hand the builder to a branch, a
+loop or another function and it stays valid until `build()`.
+
+**Python:** `Builder(Query, table="orders").user(user_id).build()`, and `.set(**kw)` for keys
+that are not valid identifiers, like `content-type`.
+
+**Not this instead?** If the call site knows every field, an object literal or keyword
+arguments are shorter and clearer. Reach for the builder when the fields arrive across
+branches.
+
+---
+
+### An expensive default you keep rebuilding
+
+Every test builds the same 40-line fixture and changes one field. Every report starts from the
+same default template. The construction is not the point, and copying it is faster than
+re-running it.
+
+```ts
+const template = { locale: 'es-MX', currency: 'MXN', sections: [...], footer: {...} };
+
+const monthly = clone(template);
+monthly.sections.push(summarySection);   // the original is untouched
+```
+
+The trap this avoids is the shallow copy: `{ ...template }` shares `sections`, so pushing to
+the copy mutates the original and the next test starts dirty.
+
+**Python:** `clone(template)`, an alias for `copy.deepcopy` — import that directly if it is all
+you need. `dataclasses.replace` when you want a copy with changes.
+
+**Not this instead?** In TypeScript this is `structuredClone`, and the helper is a one-line
+alias. Neither copies functions or class prototypes.
+
+---
+
+### Thousands of objects that are mostly the same
+
+A map renders 50,000 trees. Each has its own coordinates, but only six distinct species —
+name, texture, colour. Constructed naively, that is 50,000 copies of six pieces of data.
+
+```ts
+const species = flyweight((name: string, texture: string) => ({ name, texture }));
+
+const trees = positions.map((position) => ({
+  position,
+  species: species('oak', 'oak.png'),   // the same object every time
+}));
+```
+
+The intrinsic state — what every oak shares — is created once. The extrinsic state, the
+position, stays with each instance. That is the whole pattern, and the helper is the cache
+keyed just so.
+
+Same shape for formatters, which are expensive to construct and few in number:
+
+```ts
+const money = flyweight((locale: string, currency: string) =>
+  new Intl.NumberFormat(locale, { style: 'currency', currency }));
+```
+
+**Python:** `Flyweight(factory, key=...)`, or `functools.lru_cache` when the factory is yours
+and the default key works.
+
+**Not this instead?** If the objects differ in most of their fields, there is nothing to share.
+Measure before reaching for this one.
+
+---
+
+### A new operation over a tagged payload
+
+A webhook payload is a list of nodes, each with a `type`. Today you sum their amounts. Next
+week you validate them, then you render them. Written as a `switch`, that is three copies of
+the same dispatch, and each one forgets a case.
+
+```ts
+const total = visitor<Node, number>({
+  charge: (n) => n.cents,
+  refund: (n) => -n.cents,
+  fee: (n) => -n.cents,
+});
+
+const describe = visitor<Node, string>({
+  charge: (n) => `cobro de ${n.cents}`,
+  refund: (n) => `reembolso de ${n.cents}`,
+  fee: (n) => `comisión de ${n.cents}`,
+});
+
+nodes.reduce((sum, node) => sum + total(node), 0);
+```
+
+Each new operation is a new object, not another `switch`. And a node type nobody handled
+throws with the tag in the message instead of falling through to a default.
+
+**Python:** `visitor({...}, kind="type")`. When your nodes are classes rather than dicts,
+`functools.singledispatch` is better and dispatches on the real type.
+
+**Not this instead?** With one operation, a `switch` is clearer. This pays from the second
+operation over the same node types.
 
 ---
 

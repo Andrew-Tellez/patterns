@@ -1,0 +1,20 @@
+{
+  // The examples are executed by Node's type stripping, which does not typecheck.
+  // This config is what makes them actually checked — including the
+  // @ts-expect-error in 06-observer, whose whole point is a compile-time
+  // guarantee. An unused expect-error is TS2578, so if a typed channel ever
+  // stopped being typed, this would fail.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    // @types/node lives in the TypeScript package, which is also what provides tsc.
+    "typeRoots": ["../packages/ts/node_modules/@types"],
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"]
+}

@@ -198,6 +198,10 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      # tsc lives in the TypeScript package, and so does @types/node.
+      - name: Install the TypeScript toolchain
+        run: npm ci
+        working-directory: packages/ts
       # Each example asserts its own result, including the `before` files, which
       # assert the bug the video opens with. If one stops reproducing, the script
       # is lying and CI says so.

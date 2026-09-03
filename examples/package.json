@@ -1,0 +1,6 @@
+{
+  "//": "Not a package — this exists so Node and tsc agree the examples are ESM. Without it tsc reads them as CommonJS and rejects the top-level await that Node runs happily.",
+  "name": "gof-patterns-examples",
+  "private": true,
+  "type": "module"
+}
