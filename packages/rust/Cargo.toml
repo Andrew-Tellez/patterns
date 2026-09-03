@@ -1,0 +1,23 @@
+[package]
+name = "gof-patterns"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"          # LazyLock and OnceLock are stable from here
+description = "The 22 Gang of Four design patterns as small, typed helpers. No dependencies."
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Andrew-Tellez/patterns"
+homepage = "https://github.com/Andrew-Tellez/patterns"
+documentation = "https://docs.rs/gof-patterns"
+keywords = ["design-patterns", "gof", "state-machine", "observer", "registry"]
+categories = ["rust-patterns"]
+
+[dependencies]
+# None, and that is the point.
+
+[lints.rust]
+missing_docs = "deny"
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "deny"

@@ -27,12 +27,14 @@ one is the interesting one: it explains why that package ships **no** singleton 
 | Kotlin / JVM (usable from Java) | [`io.github.andrew-tellez:gof-patterns`](packages/kotlin) | ✅ code, release pipeline ready |
 | C# / .NET | [`gof-patterns`](packages/csharp) — `dotnet add package gof-patterns` | ✅ code, release pipeline ready |
 | Go | [`github.com/Andrew-Tellez/patterns/packages/go`](packages/go) | ✅ 100% coverage, `-race` clean |
-| Rust | `packages/rust` | planned |
+| Rust | [`gof-patterns`](packages/rust) — `cargo add gof-patterns` | ✅ 32 tests, no `unsafe`, clippy clean |
 
-Rust is planned rather than started because it is not a straight port: ownership changes the
-shape of the answer outright — Observer needs `Rc<RefCell<…>>` or channels, Memento needs
-`Clone`, and Bridge's swappable reference needs interior mutability. Doing it badly would
-mean fighting the borrow checker and shipping code no Rust developer would want.
+Rust was not a port. Ownership rewrote the API: `Singleton` and `Flyweight` hand back `Arc`
+because a value behind a lock cannot be lent as a reference, `Subject::subscribe` returns a
+guard that unsubscribes when it drops, `History` requires `Clone` and says so in the bound,
+and Chain of Responsibility dropped its `next` callback for an `Option` — the one helper
+whose shape differs across the six languages. [`packages/rust`](packages/rust) explains each
+one.
 
 Go needed no registry at all: `go get` resolves a version from a repository tag and the
 module proxy caches it, so releasing is a `git tag`.

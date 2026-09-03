@@ -42,6 +42,10 @@ public_api = true
 path = "packages/csharp"
 public_api = true
 
+[packages.rust]
+path = "packages/rust"
+public_api = true
+
 # No [packages.go] entry: the Go module proxy requires the tag to be prefixed with
 # the module's subdirectory — packages/go/v0.1.0 — which cog's <name>-v<version>
 # scheme cannot produce. Go releases are tagged by hand; see packages/go/README.md.

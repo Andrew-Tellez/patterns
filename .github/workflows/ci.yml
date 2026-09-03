@@ -155,6 +155,31 @@ jobs:
       - name: Build
         run: go build ./...
 
+  rust:
+    name: rust (${{ matrix.rust }})
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/rust
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: ['1.80', 'stable']
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Rust ${{ matrix.rust }}
+        run: |
+          rustup toolchain install ${{ matrix.rust }} --profile minimal --component clippy,rustfmt
+          rustup default ${{ matrix.rust }}
+      - name: Format
+        run: cargo fmt --check
+      # clippy::all is denied in Cargo.toml, tests included, and unsafe_code is
+      # forbidden — the lints are the review, not a suggestion.
+      - name: Clippy
+        run: cargo clippy --all-targets
+      - name: Test
+        run: cargo test
+
   examples:
     name: examples
     runs-on: ubuntu-latest
@@ -201,7 +226,7 @@ jobs:
   ci-ok:
     name: ci ok
     if: always()
-    needs: [ts, py, kotlin, csharp, go, examples, videos]
+    needs: [ts, py, kotlin, csharp, go, rust, examples, videos]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

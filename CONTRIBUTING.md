@@ -124,12 +124,17 @@ Maintainers only, and deliberately boring:
      to this repo and workflow;
    - PyPI via trusted publishing;
    - NuGet via trusted publishing, which exchanges the OIDC token for a key valid one hour;
+   - crates.io via trusted publishing, using `rust-lang/crates-io-auth-action`, whose post
+     step revokes the temporary token when the job ends;
    - Maven Central with a Portal token and a GPG signature, because it has no OIDC.
 
-Three of the four registries use no long-lived token at all: npm, PyPI and NuGet each
-authenticate with a short-lived OIDC token minted per run, which is why the `release`
+Four of the five registries use no long-lived token at all: npm, PyPI, NuGet and crates.io
+each authenticate with a short-lived OIDC token minted per run, which is why the `release`
 environment name has to match what is configured on each of them. Maven Central is the
-exception — see below.
+exception — see below. Go needs no registry: a tag is the release.
+
+crates.io needs a trusted publisher configured on the crate's settings page, pointing at this
+repository, workflow `release.yml`, environment `release`.
 
 One tag publishes one package. A `ts-v*` tag never touches PyPI.
 

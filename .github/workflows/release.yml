@@ -9,6 +9,7 @@ on:
       - 'py-v*'
       - 'kotlin-v*'
       - 'csharp-v*'
+      - 'rust-v*'
 
 permissions:
   contents: read
@@ -185,3 +186,41 @@ jobs:
           dotnet nuget push "artifacts/*.nupkg" \
             --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
             --source https://api.nuget.org/v3/index.json
+
+  crates:
+    if: startsWith(github.ref, 'refs/tags/rust-v')
+    name: publish gof-patterns (crates.io)
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write # crates.io trusted publishing (OIDC)
+    defaults:
+      run:
+        working-directory: packages/rust
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
+      - name: Verify the tag matches Cargo.toml
+        run: |
+          tagged="${GITHUB_REF_NAME#rust-v}"
+          declared="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
+          if [ "$tagged" != "$declared" ]; then
+            echo "tag $GITHUB_REF_NAME says $tagged, Cargo.toml says $declared" >&2
+            exit 1
+          fi
+      - name: Format, clippy and test
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets
+          cargo test
+      # The official OIDC action: it fetches a temporary crates.io token and its
+      # post step revokes it when the job ends, so nothing long-lived exists.
+      - name: Authenticate with crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+      - name: Publish
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
