@@ -138,6 +138,16 @@ repository, workflow `release.yml`, environment `release`.
 
 One tag publishes one package. A `ts-v*` tag never touches PyPI.
 
+The same tag also triggers `github-release.yml`, which records the release on GitHub so it
+shows in the repository's **Releases** sidebar. That is the only place a published version
+appears on the repo page: GitHub's **Packages** section lists packages published to *GitHub
+Packages* only, so npm, PyPI, crates.io and Maven Central never show up there no matter how
+many versions you publish. The README badges and the Releases list are what make them
+visible.
+
+For a tag pushed before that workflow existed, run it by hand once: Actions → **github
+release** → Run workflow → enter the tag.
+
 **Repository settings this depends on** (one-time, by a maintainer):
 
 - a `release` GitHub environment,

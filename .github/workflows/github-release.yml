@@ -1,0 +1,81 @@
+name: github release
+
+# GitHub's "Packages" sidebar only lists packages published to GitHub Packages —
+# npm, PyPI, crates.io and Maven Central never appear there. "Releases" is the
+# section that shows versions on the repository page, and this is what fills it.
+#
+# Runs alongside release.yml: that one publishes to the registry, this one records
+# the release on GitHub. Separate because publishing needs secrets and an
+# environment, and this needs neither.
+on:
+  push:
+    tags:
+      - 'ts-v*'
+      - 'py-v*'
+      - 'kotlin-v*'
+      - 'csharp-v*'
+      - 'rust-v*'
+      - 'packages/go/v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to create a release for (backfill)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # release notes are generated from the commit range
+      - name: Work out which package this tag is for
+        id: package
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          case "$TAG" in
+            ts-v*)          name='TypeScript'; version="${TAG#ts-v}";     dir='packages/ts';     url='https://www.npmjs.com/package/gof-patterns' ;;
+            py-v*)          name='Python';     version="${TAG#py-v}";     dir='packages/py';     url='https://pypi.org/project/gof-patterns/' ;;
+            kotlin-v*)      name='Kotlin/JVM'; version="${TAG#kotlin-v}"; dir='packages/kotlin'; url='https://central.sonatype.com/artifact/io.github.andrew-tellez/gof-patterns' ;;
+            csharp-v*)      name='C#/.NET';    version="${TAG#csharp-v}"; dir='packages/csharp'; url='https://www.nuget.org/packages/gof-patterns' ;;
+            rust-v*)        name='Rust';       version="${TAG#rust-v}";   dir='packages/rust';   url='https://crates.io/crates/gof-patterns' ;;
+            packages/go/v*) name='Go';         version="${TAG##*/v}";     dir='packages/go';     url='https://pkg.go.dev/github.com/Andrew-Tellez/patterns/packages/go' ;;
+            *) echo "unrecognised tag: $TAG" >&2; exit 1 ;;
+          esac
+          {
+            echo "tag=$TAG"
+            echo "name=$name"
+            echo "version=$version"
+            echo "dir=$dir"
+            echo "url=$url"
+          } >> "$GITHUB_OUTPUT"
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.package.outputs.tag }}
+          NAME: ${{ steps.package.outputs.name }}
+          VERSION: ${{ steps.package.outputs.version }}
+          DIR: ${{ steps.package.outputs.dir }}
+          URL: ${{ steps.package.outputs.url }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release for $TAG already exists, nothing to do"
+            exit 0
+          fi
+          # A composed body rather than --generate-notes: the two flags conflict,
+          # and auto-generated notes on a monorepo tag list every commit since the
+          # previous tag of a *different* package, which is noise.
+          cat > notes.md <<EOF
+          **$NAME $VERSION** — published at $URL
+
+          All 22 Gang of Four patterns as small, typed helpers. No dependencies.
+
+          - [Package README](https://github.com/${GITHUB_REPOSITORY}/tree/main/${DIR}#readme)
+          - [How to use it, and when](https://github.com/${GITHUB_REPOSITORY}/blob/main/USE-CASES.md)
+          EOF
+          gh release create "$TAG" --title "$NAME $VERSION" --notes-file notes.md
