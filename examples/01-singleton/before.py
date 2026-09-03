@@ -1,4 +1,4 @@
-"""Video 01 — Singleton, the painful version.
+"""Example 01 — Singleton, the painful version.
 
 Nobody did anything wrong here. Three unrelated pieces of code each ask for the
 configuration, so the file is read and parsed three times — and if it changes in
@@ -45,7 +45,7 @@ print(f"config leído del disco: {reads} veces")
 print(f"  checkout: {checkout}")
 print(f"  refund:   {refund}")
 
-# The example asserts the bug on purpose: this is what you are about to fix.
+# The example asserts the bug on purpose: this is the problem the pattern solves.
 assert reads == 3, "the file is parsed once per caller"
 assert checkout == "charging in MXN"
 assert refund == "refunding in USD"  # same request, different currency

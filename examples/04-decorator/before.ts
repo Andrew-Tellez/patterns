@@ -1,5 +1,5 @@
 /**
- * Video 04 — Decorator, the painful version.
+ * Example 04 — Decorator, the painful version.
  *
  * Retry and logging are tangled in the same loop, the loop is copy-pasted, and the
  * two copies have already drifted. One charge produces three log lines, which reads

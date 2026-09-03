@@ -1,4 +1,4 @@
-"""Video 05 — Factory Method / Strategy, the painful version.
+"""Example 05 — Factory Method / Strategy, the painful version.
 
 One if/elif that every new payment rail has to reopen, and a fallthrough that turns
 an unknown rail into a silent success.

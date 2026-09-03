@@ -1,5 +1,5 @@
 /**
- * Video 04 — Decorator, with the pattern.
+ * Example 04 — Decorator, with the pattern.
  *
  * Each concern is its own wrapper, and the composition line says what order they
  * run in. Swap the arguments and the original bug comes back — which is the point:
@@ -50,7 +50,7 @@ assert.equal(attempts, 3, 'still retried three times');
 assert.equal(log.length, 1, 'but logged once');
 
 // Swap the two wrappers and the original bug is back — on purpose. This is the
-// part of the video that makes the pattern click.
+// part that makes the pattern click.
 attempts = 0;
 const noisyLog: string[] = [];
 const noisyWithLog = (next: Charge): Charge => async (cents) => {

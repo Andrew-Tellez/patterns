@@ -1,5 +1,5 @@
 /**
- * Video 02 — State, the painful version.
+ * Example 02 — State, the painful version.
  *
  * Three independent booleans give eight combinations, of which only four are legal
  * orders. This file walks straight into two of the illegal ones, and nothing

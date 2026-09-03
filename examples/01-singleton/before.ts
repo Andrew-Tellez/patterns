@@ -1,5 +1,5 @@
 /**
- * Video 01 — Singleton, the painful version.
+ * Example 01 — Singleton, the painful version.
  *
  * Nobody did anything wrong here. Three unrelated pieces of code each ask for the
  * configuration, so the file is read and parsed three times — and if it changes in
@@ -47,7 +47,7 @@ console.log(`config leído del disco: ${reads} veces`);
 console.log(`  checkout: ${checkout}`);
 console.log(`  refund:   ${refund}`);
 
-// The example asserts the bug on purpose: this is what you are about to fix.
+// The example asserts the bug on purpose: this is the problem the pattern solves.
 assert.equal(reads, 3, 'the file is parsed once per caller');
 assert.equal(checkout, 'charging in MXN');
 assert.equal(refund, 'refunding in USD'); // same request, different currency

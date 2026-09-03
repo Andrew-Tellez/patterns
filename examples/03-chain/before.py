@@ -1,4 +1,4 @@
-"""Video 03 — Chain of Responsibility, the painful version.
+"""Example 03 — Chain of Responsibility, the painful version.
 
 One endpoint, three providers, one growing if/elif. The final `return` normalises
 an unknown provider to zero cents, which is how a payment gets recorded as free and

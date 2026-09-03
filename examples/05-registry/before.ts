@@ -1,5 +1,5 @@
 /**
- * Video 05 — Factory Method / Strategy, the painful version.
+ * Example 05 — Factory Method / Strategy, the painful version.
  *
  * One switch that every new payment rail has to reopen. Three teams touch this
  * function, and the default branch is what turns an unknown rail into a silent

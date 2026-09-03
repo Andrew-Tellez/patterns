@@ -1,5 +1,5 @@
 /**
- * Video 05 — Factory Method / Strategy, with the pattern.
+ * Example 05 — Factory Method / Strategy, with the pattern.
  *
  * Registration lives next to each implementation, so a new rail is a new file and
  * one `register` call. The switch never gets reopened, and an unknown key throws

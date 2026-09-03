@@ -1,4 +1,4 @@
-"""Video 06 — Observer / Mediator, with the pattern.
+"""Example 06 — Observer / Mediator, with the pattern.
 
 `pay_invoice` announces what happened and knows nothing about who cares.
 

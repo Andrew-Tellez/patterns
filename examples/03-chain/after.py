@@ -1,4 +1,4 @@
-"""Video 03 — Chain of Responsibility, with the pattern.
+"""Example 03 — Chain of Responsibility, with the pattern.
 
 One handler per provider, and the fallthrough that returned zero becomes an
 explicit fallback that raises. Adding a provider is a new function and one list

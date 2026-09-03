@@ -1,5 +1,5 @@
 /**
- * Video 01 — Singleton, with the pattern.
+ * Example 01 — Singleton, with the pattern.
  *
  * The diff against before.ts is four lines: one import, one `singleton(...)`, and
  * the call sites losing three characters each. `loadConfig` itself is untouched, so

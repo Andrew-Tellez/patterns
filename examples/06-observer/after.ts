@@ -1,5 +1,5 @@
 /**
- * Video 06 — Observer / Mediator, with the pattern.
+ * Example 06 — Observer / Mediator, with the pattern.
  *
  * `payInvoice` announces what happened and knows nothing about who cares. The
  * subscriptions live where the effects live, and a unit test of the payment path

@@ -1,5 +1,5 @@
 /**
- * Video 03 — Chain of Responsibility, with the pattern.
+ * Example 03 — Chain of Responsibility, with the pattern.
  *
  * One handler per provider, and the `else` that returned zero becomes an explicit
  * fallback that throws. Adding a provider is a new function and one array entry —

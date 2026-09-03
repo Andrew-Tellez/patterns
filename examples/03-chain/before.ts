@@ -1,5 +1,5 @@
 /**
- * Video 03 — Chain of Responsibility, the painful version.
+ * Example 03 — Chain of Responsibility, the painful version.
  *
  * One endpoint, three providers, one growing if/else. The `else` at the bottom
  * normalises an unknown provider to zero cents, which is how a payment gets

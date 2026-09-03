@@ -1,5 +1,5 @@
 /**
- * Video 06 — Observer / Mediator, the painful version.
+ * Example 06 — Observer / Mediator, the painful version.
  *
  * The function that charges the card also emails, tracks, writes the ledger and
  * refreshes a cache. It imports all five, so a unit test of "charge" needs all

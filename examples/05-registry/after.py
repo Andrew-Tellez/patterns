@@ -1,4 +1,4 @@
-"""Video 05 — Factory Method / Strategy, with the pattern.
+"""Example 05 — Factory Method / Strategy, with the pattern.
 
 Registration lives next to each implementation — and in Python it can be a
 decorator, so the registration sits directly above the thing it registers.

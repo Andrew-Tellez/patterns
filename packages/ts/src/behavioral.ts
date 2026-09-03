@@ -158,7 +158,10 @@ export type History<T> = {
 
 export function history<T>(
   initial: T,
-  options: { limit?: number; snapshot?: (state: T) => T } = {},
+  // `NoInfer` on snapshot matters: without it, passing a generic function such as
+  // `structuredClone` makes T infer as `{}` and the history loses its type. Found
+  // by writing examples/07-undo, where it turned `.undo()?.tags` into an error.
+  options: { limit?: number; snapshot?: (state: NoInfer<T>) => NoInfer<T> } = {},
 ): History<T> {
   const { limit = Infinity, snapshot = (state: T) => state } = options;
   const past: T[] = [];

@@ -1,4 +1,4 @@
-"""Video 01 — Singleton, with the pattern.
+"""Example 01 — Singleton, with the pattern.
 
 The diff against before.py is two lines: one import and one `singleton(...)`. The
 call sites lose a pair of parentheses. `load_config` itself is untouched.
@@ -59,7 +59,7 @@ assert reads == 2, "reset means the next call builds again"
 assert after_reset["currency"] == "USD", "and it picks up the current file"
 
 # What the README tells you to prefer when the function is yours to decorate.
-# Same pattern, no dependency — and this is the honest version of the video.
+# Same pattern, no dependency — and this is the honest version.
 reads_stdlib = 0
 
 

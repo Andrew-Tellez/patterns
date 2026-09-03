@@ -1,4 +1,4 @@
-"""Video 04 — Decorator, with the pattern.
+"""Example 04 — Decorator, with the pattern.
 
 Each concern is its own wrapper, and the composition line says what order they run
 in. Swap the arguments and the original bug comes back — which is the point: the

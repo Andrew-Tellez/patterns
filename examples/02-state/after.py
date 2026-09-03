@@ -1,4 +1,4 @@
-"""Video 02 — State, with the pattern.
+"""Example 02 — State, with the pattern.
 
 The transition table *is* the business rule: one place, readable by someone who has
 never seen the code. Illegal transitions raise, naming the event and the state that
