@@ -90,6 +90,9 @@ package supports.
 - **[Examples](examples)** — one runnable problem per pattern: a `before` that reproduces the
   bug, an `after` that fixes it, and a `SCRIPT.md` walking through the change step by step for
   a video or a workshop. CI runs all of them.
+- **[Publishing](docs/PUBLISHING.md)** — a runbook per registry: what to configure once, what
+  CI does every time, and the thing that bites you if nobody warned you. Four of the five
+  registries publish with no long-lived credential at all.
 - **[Videos](videos)** — the same material rendered to MP4 with Remotion: the code being
   typed, captions from the script, and terminal output copied from the runs in `examples/`.
   No screen recording, so a typo is an edit and a re-render.

@@ -148,45 +148,16 @@ visible.
 For a tag pushed before that workflow existed, run it by hand once: Actions → **github
 release** → Run workflow → enter the tag.
 
-**Repository settings this depends on** (one-time, by a maintainer):
+The one-time setup each registry needs — trusted publishing policies, the Maven namespace and
+GPG key, and which registry can and cannot publish a package that does not exist yet — is in
+[docs/PUBLISHING.md](docs/PUBLISHING.md), together with what to do when a publish fails.
 
-- a `release` GitHub environment,
-- an npm trusted publisher for `gof-patterns` pointing at this repo, workflow
-  `release.yml`, environment `release`,
-- a PyPI trusted publisher for `gof-patterns` pointing at this repo, workflow
-  `release.yml`, environment `release`,
-- a NuGet trusted publishing policy on nuget.org → your username → Trusted Publishing:
-  repository owner `Andrew-Tellez`, repository `patterns`, workflow file `release.yml`,
-  environment `release`. The policy's **scope must allow publishing new packages**, not only
-  new versions, or the first release is rejected. Also set a `NUGET_USER` secret to your
-  nuget.org profile name — not your email. It is not a credential, but it is not public
-  either,
-- the wiki initialised with one page, so `wiki.yml` has somewhere to push.
+Two things worth knowing before you touch a release:
 
-One quirk worth knowing: a new NuGet policy on a repo can start **temporarily active for
-7 days**. NuGet needs the GitHub repository and owner IDs to pin the policy against a
-resurrection attack, and it only gets them from a successful publish. Publish once inside
-that window and the policy becomes permanent.
-
-**Maven Central needs more, because it has no OIDC.** It is the only registry here that
-requires long-lived credentials, and four secrets on the `release` environment:
-
-| Secret | What it is |
-| --- | --- |
-| `CENTRAL_USERNAME` / `CENTRAL_PASSWORD` | A user token from central.sonatype.com → Account → Generate User Token. Not your login. |
-| `SIGNING_KEY` | The armoured private key: `gpg --armor --export-secret-keys <fingerprint>`. Paste it whole, `BEGIN`/`END` lines included. |
-| `SIGNING_PASSPHRASE` | That key's passphrase. |
-
-Plus, once: verify the `io.github.andrew-tellez` namespace on the Portal (it hands you a
-code, you create a public repo with that name), and publish the *public* half of the signing
-key to a keyserver — `gpg --keyserver keyserver.ubuntu.com --send-keys <fingerprint>` —
-because Central checks the signature against it.
-
-`publishingType` is `USER_MANAGED`, so a tag uploads and validates the deployment and then
-waits for you to click Publish at
-[central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments).
-Change it to `AUTOMATIC` in `release.yml` once you trust it. **Central publishes are
-permanent — there is no unpublish**, which is why it is not automatic by default.
+- **crates.io is the exception to keyless publishing.** The first version has to be published
+  by hand, because a trusted publisher can only be attached to a crate that already exists.
+- **Maven Central has no unpublish**, which is why its job uploads and then waits for a human
+  to press Publish.
 
 ## License
 
